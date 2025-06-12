@@ -1,102 +1,70 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
-      <q-toolbar>
-        <q-btn
-          flat
-          dense
-          round
-          icon="menu"
-          aria-label="Menu"
-          @click="toggleLeftDrawer"
-        />
-
-        <q-toolbar-title>
-          Quasar App
-        </q-toolbar-title>
-
-        <div>Quasar v{{ $q.version }}</div>
-      </q-toolbar>
-    </q-header>
-
-    <q-drawer
-      v-model="leftDrawerOpen"
-      show-if-above
-      bordered
+  <q-layout view="lHr lpR lFr" class="overflow-hidden">
+    <div
+      class="q-ma-sm row justify-between fixed-top z-marginals items-center rounded transparent-style q-card--bordered"
     >
-      <q-list>
-        <q-item-label
-          header
-        >
-          Essential Links
-        </q-item-label>
-
-        <EssentialLink
-          v-for="link in linksList"
-          :key="link.title"
-          v-bind="link"
+      <div class="col">
+        <q-btn
+          v-if="vpn.tab === 'orders'"
+          flat
+          size="lg"
+          class="rounded"
+          icon="chevron_left"
+          @click="vpn.tab = 'profile'"
         />
-      </q-list>
-    </q-drawer>
+      </div>
+
+      <div class="text-h6 text-weight-bold text-center q-pa-sm col">VPN</div>
+
+      <div class="col row justify-end items-center"></div>
+    </div>
+
+    <div class="gradient-piece"></div>
+
+    <div class="gradient-piece gradient-piece-top"></div>
 
     <q-page-container>
       <router-view />
     </q-page-container>
+
+    <q-tabs
+      dense
+      no-caps
+      content-class="row"
+      active-class="text-primary"
+      indicator-color="transparent"
+      class="q-ma-sm q-card--bordered rounded transparent-style fixed-bottom z-marginals"
+      v-model="vpn.tab"
+    >
+      <div class="col">
+        <q-tab name="buy" :icon="mdiCreditCardCheckOutline" label="Купить" />
+      </div>
+
+      <div class="col">
+        <q-tab name="profile" :icon="mdiAccount" label="Профиль" />
+      </div>
+
+      <div class="col">
+        <q-tab name="info" :icon="mdiInformation" label="Инструкция" />
+      </div>
+    </q-tabs>
   </q-layout>
+
+  <modal-buy></modal-buy>
+
+  <modal-free></modal-free>
+
+  <modal-order></modal-order>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import EssentialLink, { type EssentialLinkProps } from 'components/EssentialLink.vue';
+import { useVpnStore } from 'stores/vpnStore';
 
-const linksList: EssentialLinkProps[] = [
-  {
-    title: 'Docs',
-    caption: 'quasar.dev',
-    icon: 'school',
-    link: 'https://quasar.dev'
-  },
-  {
-    title: 'Github',
-    caption: 'github.com/quasarframework',
-    icon: 'code',
-    link: 'https://github.com/quasarframework'
-  },
-  {
-    title: 'Discord Chat Channel',
-    caption: 'chat.quasar.dev',
-    icon: 'chat',
-    link: 'https://chat.quasar.dev'
-  },
-  {
-    title: 'Forum',
-    caption: 'forum.quasar.dev',
-    icon: 'record_voice_over',
-    link: 'https://forum.quasar.dev'
-  },
-  {
-    title: 'Twitter',
-    caption: '@quasarframework',
-    icon: 'rss_feed',
-    link: 'https://twitter.quasar.dev'
-  },
-  {
-    title: 'Facebook',
-    caption: '@QuasarFramework',
-    icon: 'public',
-    link: 'https://facebook.quasar.dev'
-  },
-  {
-    title: 'Quasar Awesome',
-    caption: 'Community Quasar projects',
-    icon: 'favorite',
-    link: 'https://awesome.quasar.dev'
-  }
-];
+import ModalBuy from 'components/modals/ModalBuy.vue';
+import ModalOrder from 'components/modals/ModalOrder.vue';
+import ModalFree from 'components/modals/ModalFree.vue';
 
-const leftDrawerOpen = ref(false);
+import { mdiAccount, mdiCreditCardCheckOutline, mdiInformation } from '@quasar/extras/mdi-v7';
 
-function toggleLeftDrawer () {
-  leftDrawerOpen.value = !leftDrawerOpen.value;
-}
+const vpn = useVpnStore();
 </script>

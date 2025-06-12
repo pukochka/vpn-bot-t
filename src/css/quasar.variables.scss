@@ -1,25 +1,39 @@
-// Quasar SCSS (& Sass) Variables
-// --------------------------------------------------
-// To customize the look and feel of this app, you can override
-// the Sass/SCSS variables found in Quasar's source Sass/SCSS files.
+$primary: #1976d2;
+$secondary: #26a69a;
+$accent: #9c27b0;
 
-// Check documentation for full list of Quasar variables
+$dark: #1d1d1d;
+$dark-page: #121212;
 
-// Your own variables (that are declared here) and Quasar's own
-// ones will be available out of the box in your .vue/.scss/.sass files
+$positive: #21ba45;
+$negative: #c10015;
+$info: #31ccec;
+$warning: #f2c037;
 
-// It's highly recommended to change the default colors
-// to match your app's branding.
-// Tip: Use the "Theme Builder" on Quasar's documentation website.
-
-$primary   : #1976D2;
-$secondary : #26A69A;
-$accent    : #9C27B0;
-
-$dark      : #1D1D1D;
-$dark-page : #121212;
-
-$positive  : #21BA45;
-$negative  : #C10015;
-$info      : #31CCEC;
-$warning   : #F2C037;
+$gradients: (
+  brand: linear-gradient(
+      84.4deg,
+      rgba(108, 147, 255, 0.5) -4.85%,
+      rgba(151, 111, 255, 0.5) 51.72%,
+      rgba(223, 105, 209, 0.5) 110.7%
+    ),
+  blue: linear-gradient(225deg, #4eabf8 14.73%, #3478f6 85.27%),
+  primary: linear-gradient(225deg, var(--q-primary) 14.73%, #1976d27f 85.27%),
+  green: linear-gradient(230.46deg, rgba(0, 163, 180, 0.5) 12.94%, rgba(0, 203, 71, 0.5) 86.29%),
+  purple: linear-gradient(230.46deg, #ce4d74 0%, #3d52df 100%),
+  speaking: linear-gradient(135deg, #5cc85c 0%, #48a1b3 101.27%),
+  mars: linear-gradient(90deg, hsla(51, 89%, 61%, 1) 0%, hsla(25, 83%, 57%, 1) 100%),
+  pink: linear-gradient(90deg, hsla(346, 100%, 83%, 1) 0%, hsla(238, 70%, 48%, 1) 100%),
+  brush: linear-gradient(90deg, hsla(270, 94%, 25%, 1) 0%, hsla(158, 94%, 49%, 1) 100%),
+  sunset: linear-gradient(90deg, #ff6e7f, #bfe9ff),
+  ocean-blue: linear-gradient(90deg, #00c6ff, #0072ff),
+  purple-bliss: linear-gradient(90deg, #a18cd1, #fbc2eb),
+  green-fields: linear-gradient(90deg, #a8e063, #56ab2f),
+  rose-water: linear-gradient(90deg, #ffafbd, #ffc3a0),
+  night-sky: linear-gradient(90deg, #0f2027, #203a43, #2c5364),
+  flamingo: linear-gradient(90deg, #ff758c, #ff7eb3),
+  candy-floss: linear-gradient(90deg, #ff9a9e, #fad0c4),
+  blue-lagoon: linear-gradient(90deg, #2b5876, #4e4376),
+  twilight: linear-gradient(90deg, #4e54c8, #8f94fb),
+  danger: linear-gradient(90deg, hsla(52, 82%, 52%, 0.5) -10%, hsla(1, 92%, 47%, 0.5) 100%),
+);
