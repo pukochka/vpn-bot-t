@@ -83,6 +83,13 @@ body {
   flex: 1 1 auto;
 }
 
+.tab-rounded .q-tab__indicator {
+  height: 100%;
+  border: 2px solid currentColor;
+  background: transparent;
+  border-radius: 30px;
+}
+
 body.body--dark {
   .transparent-style {
     background: rgba(0, 0, 0, 0.3); /* Полупрозрачный белый */

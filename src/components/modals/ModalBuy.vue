@@ -4,17 +4,19 @@
       <modal-top>Купить</modal-top>
 
       <q-card-section class="q-pt-none">
-        <q-list class="rounded bm-list__style overflow-hidden">
-          <q-item tag="label" clickable :key="key" v-for="(period, key) of periods">
-            <q-item-section avatar>
-              <q-radio v-model="vpn.selectedPeriod" :val="key" color="primary" />
-            </q-item-section>
+        <div class="rounded bm-list__style overflow-hidden">
+          <div class="text-center text-caption q-py-sm">Выберите количество дней</div>
 
-            <q-item-section>
-              <q-item-label>{{ period }} Дней</q-item-label>
-            </q-item-section>
-          </q-item>
-        </q-list>
+          <q-tabs inline-label align="justify" class="tab-rounded" v-model="vpn.selectedPeriod">
+            <q-tab
+              class="rounded"
+              :key="key"
+              :name="key"
+              :label="period"
+              v-for="(period, key) of periods"
+            />
+          </q-tabs>
+        </div>
       </q-card-section>
 
       <modal-bottom no-top-space>

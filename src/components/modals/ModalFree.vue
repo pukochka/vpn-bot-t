@@ -1,7 +1,7 @@
 <template>
   <q-dialog persistent position="bottom" v-model="vpn.modals.free">
     <q-card class="modal-rounded modal-responsive">
-      <modal-top>Купить</modal-top>
+      <modal-top>Бесплатный ключ</modal-top>
 
       <q-card-section class="q-pt-none">
         <order-card :order="defaultKey"></order-card>
