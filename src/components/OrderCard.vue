@@ -60,10 +60,6 @@ const columns = computed(() => [
     link: true,
   },
   {
-    label: 'Лимит трафика',
-    value: props.order.traffic_limit_gb + ' Гб',
-  },
-  {
     label: 'Дата окончания действия ключа',
     value: date.formatDate(
       finish.value,

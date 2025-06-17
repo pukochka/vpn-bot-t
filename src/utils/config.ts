@@ -7,6 +7,5 @@ export default {
   bot_id: getQueryParam('bot_id'),
   public_key: getQueryParam('public_key'),
 
-  dark: true,
-  // dark: window.Telegram.WebApp.colorScheme === 'dark',
+  dark: window.Telegram.WebApp.colorScheme === 'dark',
 };
