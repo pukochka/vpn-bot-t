@@ -17,6 +17,26 @@ declare interface VpnKey {
   is_free: boolean;
 }
 
+declare interface User {
+  id: number;
+  bot_id: number;
+  user: {
+    id: number;
+    telegram_id: number;
+    username: string;
+    first_name: string;
+    last_name: string;
+    link: string;
+    type: string;
+  };
+  ref: null;
+  money: number;
+  status: number;
+  create_at: number;
+  update_at: number;
+  secret_user_key: string;
+}
+
 declare interface VpnInstruction {
   title: string;
   steps?: Array<string>;

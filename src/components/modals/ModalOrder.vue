@@ -4,7 +4,7 @@
       <modal-top>Детали заказа</modal-top>
 
       <q-card-section class="q-pt-none">
-        <order-card :order="defaultKey"></order-card>
+        <order-card :order="vpn.selectedOrder || defaultKey"></order-card>
       </q-card-section>
 
       <modal-bottom no-top-space> </modal-bottom>

@@ -7,8 +7,8 @@ export function useNotify(
 ) {
   return Notify.create({
     html: true,
-    position: position || 'top',
     message: message,
+    position: position || 'top',
     classes: 'rounded no-shadow',
     timeout: timeout || 1500,
   });

@@ -1,54 +1,72 @@
 <template>
   <q-layout view="lHr lpR lFr" class="overflow-hidden">
-    <div
-      class="q-ma-sm row justify-between fixed-top z-marginals items-center rounded transparent-style q-card--bordered"
-    >
-      <div class="col">
-        <q-btn
-          v-if="vpn.tab === 'orders'"
-          flat
-          size="lg"
-          class="rounded"
-          icon="chevron_left"
-          @click="vpn.tab = 'profile'"
-        />
+    <transition name="q-transition--fade">
+      <div
+        v-if="!vpn.loading && !vpn.error"
+        class="q-ma-sm row justify-between fixed-top z-marginals items-center rounded transparent-style q-card--bordered"
+      >
+        <div class="col">
+          <q-btn
+            v-if="vpn.tab === 'orders'"
+            flat
+            size="lg"
+            class="rounded"
+            icon="chevron_left"
+            @click="vpn.tab = 'profile'"
+          />
+        </div>
+
+        <div class="text-h6 text-weight-bold text-center q-pa-sm col">VPN</div>
+
+        <div class="col row justify-end items-center"></div>
       </div>
-
-      <div class="text-h6 text-weight-bold text-center q-pa-sm col">VPN</div>
-
-      <div class="col row justify-end items-center"></div>
-    </div>
+    </transition>
 
     <div class="gradient-piece"></div>
 
     <div class="gradient-piece gradient-piece-top"></div>
 
-    <q-page-container>
-      <router-view />
-    </q-page-container>
+    <transition name="q-transition--fade">
+      <q-page-container v-if="!vpn.loading && !vpn.error">
+        <router-view />
+      </q-page-container>
+    </transition>
 
-    <q-tabs
-      dense
-      no-caps
-      content-class="row"
-      active-class="text-primary"
-      indicator-color="transparent"
-      class="q-ma-sm q-card--bordered rounded transparent-style fixed-bottom z-marginals"
-      v-model="vpn.tab"
-    >
-      <div class="col">
-        <q-tab name="buy" :icon="mdiCreditCardCheckOutline" label="Купить" />
-      </div>
+    <transition name="q-transition--fade">
+      <q-tabs
+        v-if="!vpn.loading && !vpn.error"
+        dense
+        no-caps
+        content-class="row"
+        active-class="text-primary"
+        indicator-color="transparent"
+        class="q-ma-sm q-card--bordered rounded transparent-style fixed-bottom z-marginals"
+        v-model="vpn.tab"
+      >
+        <div class="col">
+          <q-tab name="buy" :icon="mdiCreditCardCheckOutline" label="Купить" />
+        </div>
 
-      <div class="col">
-        <q-tab name="profile" :icon="mdiAccount" label="Профиль" />
-      </div>
+        <div class="col">
+          <q-tab name="profile" :icon="mdiAccount" label="Профиль" />
+        </div>
 
-      <div class="col">
-        <q-tab name="info" :icon="mdiInformation" label="Инструкция" />
-      </div>
-    </q-tabs>
+        <div class="col">
+          <q-tab name="info" :icon="mdiInformation" label="Инструкция" />
+        </div>
+      </q-tabs>
+    </transition>
   </q-layout>
+
+  <q-inner-loading
+    transition-show="none"
+    transition-hide="fade"
+    :showing="vpn.loading || vpn.error"
+  >
+    <div class="text-h4" v-if="vpn.error">Ошибка...</div>
+
+    <q-spinner v-else :thickness="1" size="120px" color="primary" />
+  </q-inner-loading>
 
   <modal-buy></modal-buy>
 

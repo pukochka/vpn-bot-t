@@ -36,13 +36,16 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { defaultKey } from 'stores/vpnModels';
+import { defaultKey, months } from 'stores/vpnModels';
 
 import CopyButton from './modals/sections/CopyButton.vue';
+import { date } from 'quasar';
 
 const props = withDefaults(defineProps<Props>(), {
   order: () => defaultKey,
 });
+
+const finish = computed(() => Number(props.order.finish_at) * 1000);
 
 const columns = computed(() => [
   {
@@ -58,22 +61,17 @@ const columns = computed(() => [
   },
   {
     label: 'Лимит трафика',
-    value: props.order.traffic_limit_gb + ' Gb',
+    value: props.order.traffic_limit_gb + ' Гб',
   },
   {
     label: 'Дата окончания действия ключа',
-    value: props.order.finish_at,
-  },
-  {
-    label: 'Дата активации ключа',
-    value: props.order.activated_at,
+    value: date.formatDate(
+      finish.value,
+      'DD ' + months[new Date(finish.value).getMonth()] + ' YYYY',
+    ),
   },
   {
     label: 'Статус ключа',
-    value: props.order.status,
-  },
-  {
-    label: 'Текстовое описание статуса',
     value: props.order.status_text,
   },
 ]);

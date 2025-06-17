@@ -11,6 +11,29 @@ const palette: Record<number, string> = {
   7: '#d80032',
 };
 
+export const textGradients = {
+  'purple-bliss': 'white',
+  'green-fields': 'white',
+  flamingo: 'grey-9',
+  'blue-lagoon': 'white',
+  brand: 'white',
+  green: 'white',
+  mars: 'white',
+  pink: 'primary',
+  brush: 'white',
+};
+
+export const gradients = Object.keys(textGradients);
+
+export function alphabetColor(name: string) {
+  const symbol = name.replace(/bot/gi, '').replace(/[.*+?^${}()|[\]\\]/g, '');
+
+  return (
+    gradients[symbol.charCodeAt(symbol.length / 2) % gradients.length] ||
+    gradients[gradients.length - 1]
+  );
+}
+
 import lighten = colors.lighten;
 import getPaletteColor = colors.getPaletteColor;
 

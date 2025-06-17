@@ -14,10 +14,17 @@ instance.interceptors.request.use(function (request) {
 
 instance.interceptors.response.use(
   function (response) {
-    return response;
+    if (response.data.result) {
+      return response;
+    }
+
+    useDialog(response.data?.message || 'Ошибка');
+
+    // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
+    return Promise.reject();
   },
   async function (error) {
-    if (error.response.status !== 200 || !error.response.data.success) {
+    if (error.response.status !== 200 || !error.response.data.result) {
       useDialog(error.response.data?.message || 'Ошибка');
     }
 

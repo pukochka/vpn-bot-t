@@ -32,7 +32,7 @@ body {
 }
 
 .rounded {
-  border-radius: 25px;
+  border-radius: 25px !important;
 }
 
 .bordered {
@@ -72,8 +72,8 @@ body {
 
 .bm-fit--container {
   display: flex;
-  flex-flow: column;
   height: 100%;
+  flex-flow: column;
 }
 
 .bm-fit--container-content {
@@ -121,13 +121,17 @@ body.body--dark {
 }
 
 .gradient-piece-top {
-  transform: rotate(180deg);
-  left: 0;
   top: 0;
+  left: 0;
+  transform: rotate(180deg);
+}
+
+.transition {
+  transition: 0.2s cubic-bezier(0.25, 0.8, 0.5, 1) background-color;
 }
 
 .bm-list__style {
-  background: #f8f8f9;
+  background: #f5f3f4;
 }
 
 .z-5 {
