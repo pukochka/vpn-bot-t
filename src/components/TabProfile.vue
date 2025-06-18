@@ -1,5 +1,5 @@
 <template>
-  <q-list padding class="rounded transparent-style overflow-hidden">
+  <q-list padding class="rounded transparent-style q-card--bordered overflow-hidden">
     <q-item>
       <q-item-section side>
         <q-icon :name="mdiAccount" size="36px"></q-icon>
