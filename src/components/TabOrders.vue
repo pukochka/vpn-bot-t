@@ -22,7 +22,7 @@
 
   <q-list class="q-gutter-y-sm q-pt-md col">
     <div
-      class="transparent-style rounded overflow-hidden row items-stretch"
+      class="transparent-style q-card--bordered rounded overflow-hidden row items-stretch"
       :key="order.key"
       v-for="order in filtered"
     >
@@ -39,7 +39,7 @@
           <q-item-section v-for="(col, index) of columns" :key="index">
             <q-item-label>{{ col.value(order) }}</q-item-label>
 
-            <q-item-label caption>{{ col.label }}</q-item-label>
+            <q-item-label caption v-if="col.value(order) !== ''">{{ col.label }}</q-item-label>
           </q-item-section>
         </q-item>
       </div>
@@ -70,7 +70,8 @@ const finish = (order: VpnKey) =>
 const columns = computed(() => [
   {
     label: 'Лимит трафика',
-    value: (order: VpnKey) => order.traffic_limit_gb + ' Гб',
+    value: (order: VpnKey) =>
+      order.traffic_limit_gb !== 500 ? order.traffic_limit_gb + ' Гб' : '',
   },
   {
     label: 'Статус ключа',
