@@ -95,16 +95,16 @@ const filterPages = computed(
   }),
 );
 
-const pages = computed(() => Math.ceil(filterPages.value[filter.value] / vpn.limit));
+const pages = computed(() => Math.ceil(filterPages.value[filter.value] / 5));
 
 const filtered = computed(() =>
-  vpn.orders.filter(
-    (order, index) =>
-      index < vpn.limit * vpn.page &&
-      index >= vpn.limit * (vpn.page - 1) &&
-      order.status !== filter.value &&
-      (filter.value === '0' ? Date.now() < Number(order.finish_at) * 1000 : true),
-  ),
+  vpn.orders
+    .filter(
+      (order) =>
+        order.status !== filter.value &&
+        (filter.value === '0' ? Date.now() < Number(order.finish_at) * 1000 : true),
+    )
+    .filter((_, index) => index < 5 * vpn.page && index >= 5 * (vpn.page - 1)),
 );
 
 const finish = (order: VpnKey) =>
