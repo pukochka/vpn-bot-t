@@ -9,6 +9,10 @@ export interface VpnModels {
   user: User;
   prises: string;
 
+  page: number;
+  limit: number;
+  total: number;
+
   orders: Array<VpnKey>;
   selectedOrder: VpnKey | null;
 

@@ -35,6 +35,11 @@ body {
   border-radius: 25px !important;
 }
 
+.modal-rounded {
+  width: 100%;
+  border-radius: 25px 25px 0 0 !important;
+}
+
 .bordered {
   border: 1px solid rgba(0, 0, 0, 0.12) !important;
 }

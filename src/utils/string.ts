@@ -1,16 +1,17 @@
 export function getHash(): string {
-  const url = new URL(window.location.href);
-
-  url.searchParams.delete('service');
-
-  const index =
-    url.search.indexOf('&tgWebAppPlatform') === -1
-      ? url.search.length
-      : url.search.indexOf('&tgWebAppPlatform');
-
-  const currentString = url.search.slice(1, index);
-
-  return window.Telegram.WebApp.initData === '' ? currentString : window.Telegram.WebApp.initData;
+  return 'query_id=AAF5WlE9AAAAAHlaUT1Ugciv&user=%7B%22id%22%3A1028741753%2C%22first_name%22%3A%22Artem%22%2C%22last_name%22%3A%22%22%2C%22username%22%3A%22pykochka%22%2C%22language_code%22%3A%22ru%22%2C%22allows_write_to_pm%22%3Atrue%2C%22photo_url%22%3A%22https%3A%5C%2F%5C%2Ft.me%5C%2Fi%5C%2Fuserpic%5C%2F320%5C%2FkUrSHmWBaFXJ4YJCRk8ik6ttfZNiI8PHw18PYev7mfU.svg%22%7D&auth_date=1750330006&signature=VmPLG6jtzEiNQ9DiTR119-22B5ROWM9na6n756f2JZnrYcVzvKIlEluBsDR7mAJjy1zdpD2GdRgbalWVVnCtDg&hash=ad04a7433c22a77e0ae7aa3ddf01b34fe00792bd0faf7b4a2dccba08d14fe970';
+  // const url = new URL(window.location.href);
+  //
+  // url.searchParams.delete('service');
+  //
+  // const index =
+  //   url.search.indexOf('&tgWebAppPlatform') === -1
+  //     ? url.search.length
+  //     : url.search.indexOf('&tgWebAppPlatform');
+  //
+  // const currentString = url.search.slice(1, index);
+  //
+  // return window.Telegram.WebApp.initData === '' ? currentString : window.Telegram.WebApp.initData;
 }
 
 export function getQueryParam(name: string, str?: string) {

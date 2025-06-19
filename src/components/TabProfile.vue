@@ -36,7 +36,7 @@
       </q-item-section>
 
       <q-item-section>
-        <q-item-label class="text-h6">{{ vpn.orders.length }}</q-item-label>
+        <q-item-label class="text-h6">{{ vpn.total }}</q-item-label>
 
         <q-item-label caption>
           <div class="text-body1">Купленные ключи</div>

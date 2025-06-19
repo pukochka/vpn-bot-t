@@ -34,8 +34,12 @@ export class VpnService {
   /** Возвращает список всех ключей, принадлежащих пользователю. */
   static async orders(
     user_tg_id: number,
-  ): Promise<AxiosResponse<VpnResponseInstance<{ keys: Array<VpnKey>; message: string }>>> {
-    return await api.get<VpnResponseInstance<{ keys: Array<VpnKey>; message: string }>>({
+  ): Promise<
+    AxiosResponse<VpnResponseInstance<{ keys: Array<VpnKey>; total: number; message: string }>>
+  > {
+    return await api.get<
+      VpnResponseInstance<{ keys: Array<VpnKey>; total: number; message: string }>
+    >({
       url: 'user-keys',
       params: { user_tg_id },
     });

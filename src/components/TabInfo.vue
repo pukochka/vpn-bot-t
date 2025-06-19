@@ -1,5 +1,5 @@
 <template>
-  <div class="rounded transparent-style q-pa-sm">
+  <div class="rounded transparent-style q-card--bordered q-pa-sm">
     <div class="q-py-md" v-for="(section, index) of vpn.instructions.sections" :key="index">
       <div class="text-h6 text-center">{{ section.title }}</div>
 

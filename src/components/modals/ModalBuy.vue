@@ -4,7 +4,7 @@
       <modal-top>Купить</modal-top>
 
       <q-card-section class="q-pt-none">
-        <div class="rounded transparent-style overflow-hidden">
+        <div class="rounded transparent-style q-card--bordered overflow-hidden">
           <div class="text-center text-caption q-py-sm">Выберите количество дней</div>
 
           <q-tabs inline-label align="justify" class="tab-rounded" v-model="vpn.selectedPeriod">

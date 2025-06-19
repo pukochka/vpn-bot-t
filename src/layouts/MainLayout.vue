@@ -18,7 +18,19 @@
 
         <div class="text-h6 text-weight-bold text-center q-pa-sm col">VPN</div>
 
-        <div class="col row justify-end items-center"></div>
+        <div class="col row justify-end">
+          <q-btn
+            v-if="vpn.tab !== 'orders'"
+            flat
+            stack
+            no-caps
+            class="rounded"
+            :icon="mdiFolderKeyOutline"
+            @click="vpn.tab = 'orders'"
+          >
+            <div class="text-body2 text-weight-medium">Ключи</div>
+          </q-btn>
+        </div>
       </div>
     </transition>
 
@@ -82,7 +94,12 @@ import ModalBuy from 'components/modals/ModalBuy.vue';
 import ModalOrder from 'components/modals/ModalOrder.vue';
 import ModalFree from 'components/modals/ModalFree.vue';
 
-import { mdiAccount, mdiCreditCardCheckOutline, mdiInformation } from '@quasar/extras/mdi-v7';
+import {
+  mdiAccount,
+  mdiCreditCardCheckOutline,
+  mdiFolderKeyOutline,
+  mdiInformation,
+} from '@quasar/extras/mdi-v7';
 
 const vpn = useVpnStore();
 </script>

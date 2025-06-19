@@ -26,12 +26,13 @@
 </template>
 
 <script setup lang="ts">
+import { VpnService } from 'src/api/vpn';
 import { useVpnStore } from 'stores/vpnStore';
+
 import TabBuy from 'components/TabBuy.vue';
-import TabProfile from 'components/TabProfile.vue';
 import TabInfo from 'components/TabInfo.vue';
 import TabOrders from 'components/TabOrders.vue';
-import { VpnService } from 'src/api/vpn';
+import TabProfile from 'components/TabProfile.vue';
 
 const vpn = useVpnStore();
 
@@ -43,6 +44,7 @@ const updatePanel = async () => {
 
     const response = await VpnService.orders(vpn.user.user.telegram_id);
 
+    vpn.total = response.data.data.total;
     vpn.orders = response.data.data.keys;
   } catch {
   } finally {
