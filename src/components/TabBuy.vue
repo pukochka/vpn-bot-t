@@ -3,9 +3,7 @@
     <div class="absolute-full bg-gradient--green"></div>
 
     <q-item-section class="z-5">
-      <q-item-label class="text-center text-h6 text-weight-bold">
-        Получить VPN Бесплатно
-      </q-item-label>
+      <q-item-label class="text-center text-h6 text-weight-bold"> Ваш бесплатный VPN </q-item-label>
 
       <q-item-label class="text-center">Выдача доступна каждый месяц</q-item-label>
     </q-item-section>
