@@ -143,6 +143,22 @@ body.body--dark {
   z-index: 5;
 }
 
+.app-link {
+  color: inherit;
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  border-radius: 25px;
+  padding: 0 26px;
+  text-decoration: none;
+  &::after {
+    margin-left: 16px;
+    font-size: 20px;
+    content: 'launch';
+    font-family: 'Material Icons';
+  }
+}
+
 @each $name, $color in $gradients {
   .bg-gradient--#{$name} {
     background: #{$color} !important;
