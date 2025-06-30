@@ -2,6 +2,7 @@
   <div class="text-h6 q-pa-md">Ваши ключи</div>
 
   <q-tabs
+    v-if="vpn.orders.length"
     dense
     no-caps
     align="justify"
@@ -48,7 +49,10 @@
       <q-btn flat no-caps class="rounded" icon="more_vert" @click="openDetails(order)" />
     </div>
 
-    <div class="row rounded items-center transparent-style q-card--bordered overflow-hidden">
+    <div
+      v-if="vpn.orders.length"
+      class="row rounded items-center transparent-style q-card--bordered overflow-hidden"
+    >
       <q-btn flat square class="col" icon="chevron_left" @click="prev" />
 
       <q-btn flat square no-caps class="col">
@@ -57,21 +61,17 @@
         <q-menu cover class="q-pa-md no-shadow rounded transparent-style q-card--bordered">
           <q-input dense v-model="search" label="Введите номер страницы">
             <template #append>
-              <q-btn
-                flat
-                round
-                dense
-                v-close-popup
-                icon="check"
-                color="primary"
-                @click="searchPage"
-              />
+              <q-btn flat round dense v-close-popup icon="check" @click="searchPage" />
             </template>
           </q-input>
         </q-menu>
       </q-btn>
 
       <q-btn flat square class="col" icon="chevron_right" @click="next" />
+    </div>
+
+    <div class="text-center text-h6 text-weight-bold" v-else>
+      У Вас пока нет купленных ключей...
     </div>
   </q-list>
 </template>

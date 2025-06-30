@@ -7,9 +7,8 @@
       flat
       no-caps
       v-close-popup
-      color="primary"
       label="Закрыть"
-      class="rounded col"
+      class="rounded col q-card--bordered"
       v-if="!props.noClose"
     />
 

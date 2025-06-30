@@ -21,7 +21,6 @@
         flat
         v-close-popup
         icon="close"
-        color="primary"
         class="rounded"
         @click="emit('close')"
       />

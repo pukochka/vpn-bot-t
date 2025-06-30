@@ -19,10 +19,12 @@
 </template>
 
 <script setup lang="ts">
-import { mdiContentCopy } from '@quasar/extras/mdi-v7';
-import { copyToClipboard, QBtnProps } from 'quasar';
-import { useNotify } from 'src/utils/useNotify';
 import { computed, ref, useSlots } from 'vue';
+import type { QBtnProps } from 'quasar';
+import { copyToClipboard } from 'quasar';
+
+import { useNotify } from 'src/utils/useNotify';
+import { mdiContentCopy } from '@quasar/extras/mdi-v7';
 
 const props = withDefaults(defineProps<CopyButtonProps>(), {
   text: '',
@@ -35,8 +37,8 @@ const hasSlot = computed(() => !!slots['default']);
 
 const copied = ref(false);
 
-const copyText = () => {
-  copyToClipboard(props.text + '').then(() => {
+const copyText = async () => {
+  await copyToClipboard(props.text + '').then(() => {
     copied.value = true;
     useNotify('Скопировано!');
 

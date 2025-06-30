@@ -29,8 +29,7 @@
           no-caps
           unelevated
           label="Купить"
-          color="primary"
-          class="rounded col"
+          class="rounded col q-card--bordered"
           :loading="loading"
           @click="buyPeriod"
         />

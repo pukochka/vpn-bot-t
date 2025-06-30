@@ -49,11 +49,6 @@ const finish = computed(() => Number(props.order.finish_at) * 1000);
 
 const columns = computed(() => [
   {
-    label: 'Ключ',
-    value: props.order.key,
-    copy: true,
-  },
-  {
     label: 'URL конфигурации для VPN',
     value: props.order.config_url,
     copy: true,

@@ -7,6 +7,18 @@
         <order-card :order="vpn.selectedOrder || defaultKey"></order-card>
       </q-card-section>
 
+      <q-card-section class="q-pt-none row">
+        <q-btn
+          flat
+          no-caps
+          icon="launch"
+          target="_blank"
+          label="Перейти к конфигурации"
+          class="col q-card--bordered rounded"
+          :href="vpn.selectedOrder?.config_url"
+        />
+      </q-card-section>
+
       <modal-bottom no-top-space> </modal-bottom>
     </q-card>
   </q-dialog>

@@ -11,6 +11,18 @@
         <order-card v-else :order="freeKey"></order-card>
       </q-card-section>
 
+      <q-card-section class="q-pt-none row">
+        <q-btn
+          flat
+          no-caps
+          icon="launch"
+          target="_blank"
+          label="Перейти к конфигурации"
+          class="col q-card--bordered rounded"
+          :href="freeKey.config_url"
+        />
+      </q-card-section>
+
       <modal-bottom no-top-space> </modal-bottom>
 
       <q-inner-loading transition-show="none" transition-hide="fade" :showing="loading">
