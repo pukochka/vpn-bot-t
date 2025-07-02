@@ -16,6 +16,7 @@ export default boot(() => {
     .then(([responseAuth, responseSettings]) => {
       vpn.user = responseAuth.data.data;
       vpn.prises = responseSettings.data.data?.tariff_cost;
+      vpn.freeShow = responseSettings.data.data?.free_show;
     })
     .catch(() => {
       vpn.error = true;

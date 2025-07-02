@@ -12,6 +12,7 @@ export interface VpnModels {
   page: number;
   limit: number;
   total: number;
+  freeShow: number;
 
   orders: Array<VpnKey>;
   selectedOrder: VpnKey | null;

@@ -45,14 +45,6 @@ export class VpnService {
     });
   }
 
-  /** Возвращает информацию о конкретном ключе. */
-  static async keyInfo(key: string): Promise<AxiosResponse<VpnResponseInstance<{ key: VpnKey }>>> {
-    return await api.post<VpnResponseInstance<{ key: VpnKey }>>({
-      url: 'user-key',
-      data: { key },
-    });
-  }
-
   /** Возвращает список всех ключей, принадлежащих пользователю. */
   static async instructions(): Promise<
     AxiosResponse<{ sections: Array<VpnInstruction>; success: boolean; support_text: string }>

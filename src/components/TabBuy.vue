@@ -1,5 +1,5 @@
 <template>
-  <q-item clickable v-ripple class="vpn-card" @click="vpn.openModal('free')">
+  <q-item v-if="vpn.freeShow === 1" clickable class="vpn-card" @click="vpn.openModal('free')">
     <div class="absolute-full bg-gradient--green"></div>
 
     <q-item-section class="z-5">
@@ -9,7 +9,7 @@
     </q-item-section>
   </q-item>
 
-  <q-item clickable v-ripple class="vpn-card" @click="buyHalfYear">
+  <q-item clickable class="vpn-card" @click="buyHalfYear">
     <div class="absolute-full bg-gradient--brand"></div>
 
     <q-item-section class="z-5">
@@ -19,7 +19,7 @@
     </q-item-section>
   </q-item>
 
-  <q-item clickable v-ripple class="vpn-card" @click="vpn.openModal('buy')">
+  <q-item clickable class="vpn-card" @click="vpn.openModal('buy')">
     <div class="absolute-full bg-gradient--primary"></div>
 
     <q-item-section class="z-5">
