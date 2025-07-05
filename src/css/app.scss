@@ -55,6 +55,9 @@ body {
   overflow: hidden;
   text-align: center;
   color: #1e1e1e;
+  &.info {
+    height: auto;
+  }
 }
 
 .transparent-style {

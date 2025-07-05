@@ -9,13 +9,25 @@
     </q-item-section>
   </q-item>
 
-  <q-item clickable class="vpn-card" @click="buyHalfYear">
+  <q-item clickable class="vpn-card info" @click="buyHalfYear">
     <div class="absolute-full bg-gradient--brand"></div>
 
     <q-item-section class="z-5">
-      <q-item-label class="text-h6 text-weight-bold">Получить 180 Дней</q-item-label>
+      <q-item-label class="row justify-center">
+        <q-list dense>
+          <q-item :key="item.label" v-for="item of content">
+            <q-item-section side>
+              <q-icon :name="item.icon" color="black" size="32px" />
+            </q-item-section>
 
-      <q-item-label class="text-center">Самый популярный выбор</q-item-label>
+            <q-item-section>
+              <q-item-label class="text-center text-weight-bold q-pt-sm text-h6">
+                {{ item.label }}
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </q-item-label>
     </q-item-section>
   </q-item>
 
@@ -30,8 +42,25 @@
 
 <script setup lang="ts">
 import { useVpnStore } from 'stores/vpnStore';
+import {
+  mdiCrown,
+  mdiIncognito,
+  mdiShieldCheck,
+  mdiSpeedometer,
+  mdiVpn,
+  mdiWifiLock,
+} from '@quasar/extras/mdi-v7';
 
 const vpn = useVpnStore();
+
+const content = [
+  { label: 'Лучший VPN', icon: mdiCrown },
+  { label: 'Безопасный серфинг', icon: mdiShieldCheck },
+  { label: 'Анонимность', icon: mdiIncognito },
+  { label: 'Максимальная скорость', icon: mdiSpeedometer },
+  { label: 'Обход блокировок', icon: mdiVpn },
+  { label: 'Защита в общественных сетях', icon: mdiWifiLock },
+];
 
 const buyHalfYear = () => {
   vpn.selectedPeriod = '6';
