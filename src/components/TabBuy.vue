@@ -9,7 +9,7 @@
     </q-item-section>
   </q-item>
 
-  <q-item clickable class="vpn-card info" @click="buyHalfYear">
+  <q-item clickable class="vpn-card info q-my-sm" @click="buyHalfYear">
     <div class="absolute-full bg-gradient--brand"></div>
 
     <q-item-section class="z-5">
@@ -17,11 +17,11 @@
         <q-list dense>
           <q-item :key="item.label" v-for="item of content">
             <q-item-section side>
-              <q-icon :name="item.icon" color="black" size="32px" />
+              <q-icon :name="item.icon" color="black" size="26px" />
             </q-item-section>
 
             <q-item-section>
-              <q-item-label class="text-center text-weight-bold q-pt-sm text-h6">
+              <q-item-label class="text-center text-weight-bold q-pt-sm">
                 {{ item.label }}
               </q-item-label>
             </q-item-section>
