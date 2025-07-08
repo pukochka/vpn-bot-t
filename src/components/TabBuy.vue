@@ -13,15 +13,17 @@
     <div class="absolute-full bg-gradient--brand"></div>
 
     <q-item-section class="z-5">
+      <q-item-label class="text-center text-h6 text-weight-bold"> Лучший VPN </q-item-label>
+
       <q-item-label class="row justify-center">
         <q-list dense>
           <q-item :key="item.label" v-for="item of content">
             <q-item-section side>
-              <q-icon :name="item.icon" color="black" size="26px" />
+              <q-icon :name="item.icon" :color="Dark.isActive ? 'white' : 'black'" size="26px" />
             </q-item-section>
 
             <q-item-section>
-              <q-item-label class="text-center text-weight-bold q-pt-sm">
+              <q-item-label class="text-left q-pt-xs text-body1">
                 {{ item.label }}
               </q-item-label>
             </q-item-section>
@@ -43,18 +45,17 @@
 <script setup lang="ts">
 import { useVpnStore } from 'stores/vpnStore';
 import {
-  mdiCrown,
   mdiIncognito,
   mdiShieldCheck,
   mdiSpeedometer,
   mdiVpn,
   mdiWifiLock,
 } from '@quasar/extras/mdi-v7';
+import { Dark } from 'quasar';
 
 const vpn = useVpnStore();
 
 const content = [
-  { label: 'Лучший VPN', icon: mdiCrown },
   { label: 'Безопасный серфинг', icon: mdiShieldCheck },
   { label: 'Анонимность', icon: mdiIncognito },
   { label: 'Максимальная скорость', icon: mdiSpeedometer },
