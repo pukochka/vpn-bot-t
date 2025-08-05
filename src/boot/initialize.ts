@@ -3,11 +3,14 @@ import { boot } from 'quasar/wrappers';
 import config from 'src/utils/config';
 import { VpnService } from 'src/api/vpn';
 import { useVpnStore } from 'stores/vpnStore';
+import vXssHtml from 'src/utils/vXssHtml';
 
-export default boot(() => {
+export default boot(({ app }) => {
   const vpn = useVpnStore();
 
   Dark.set(config.dark);
+
+  app.directive('xss-html', vXssHtml);
 
   window.Telegram.WebApp.expand();
   window.Telegram.WebApp.enableClosingConfirmation();
