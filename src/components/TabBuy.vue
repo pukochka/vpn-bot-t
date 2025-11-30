@@ -48,6 +48,7 @@ import {
   mdiIncognito,
   mdiShieldCheck,
   mdiSpeedometer,
+  mdiTabletCellphone,
   mdiVpn,
   mdiWifiLock,
 } from '@quasar/extras/mdi-v7';
@@ -61,6 +62,7 @@ const content = [
   { label: 'Максимальная скорость', icon: mdiSpeedometer },
   { label: 'Обход блокировок', icon: mdiVpn },
   { label: 'Защита в общественных сетях', icon: mdiWifiLock },
+  { label: '3 устройства для подключения', icon: mdiTabletCellphone },
 ];
 
 const buyHalfYear = () => {

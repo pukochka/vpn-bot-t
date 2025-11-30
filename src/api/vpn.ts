@@ -55,6 +55,7 @@ export class VpnService {
       support_text: string;
     }>({
       url: 'vpn-instructions',
+      params: { public_key: config.public_key },
     });
   }
 

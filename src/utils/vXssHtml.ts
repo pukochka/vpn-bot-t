@@ -1,11 +1,7 @@
 import * as xss from 'xss';
 import type { Directive } from 'vue';
 
-const bmXss = new xss.FilterXSS({
-  onTag: (tag, html) => {
-    return tag === 'a' ? html.replace(/<[^>]*>/g, '') : html;
-  },
-});
+const bmXss = new xss.FilterXSS();
 
 const vXssHtml: Directive = {
   mounted(el, binding) {
