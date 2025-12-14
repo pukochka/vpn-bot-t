@@ -42,7 +42,7 @@ const updatePanel = async () => {
   try {
     vpn.loadingOrders = true;
 
-    const response = await VpnService.orders(vpn.user.user.telegram_id);
+    const response = await VpnService.orders(vpn.user.user.telegram_id, vpn.user.secret_user_key);
 
     vpn.total = response.data.data.total;
     vpn.orders = response.data.data.keys;
