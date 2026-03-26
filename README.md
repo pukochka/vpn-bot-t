@@ -1,40 +1,26 @@
-# BOT-T Vpn Module (vpn)
+# BOT-T VPN Module
 
-VPN Module
+## Быстрый старт
 
-## Install the dependencies
 ```bash
-yarn
-# or
+git clone vpn-bot-t
+cd vpn-bot-t
 npm install
 ```
 
-### Start the app in development mode (hot-code reloading, error reporting, etc.)
+## Настройка
+
+Перед запуском проверьте `config.json` в корне проекта:
+
+- `domain` - домен VPN-сервиса
+- `authDomain` - домен API авторизации
+- `botId` - ID бота (если нужен)
+- `publicKey` - публичный ключ (если нужен)
+
+## Сборка приложения в режиме SPA
+
 ```bash
-quasar dev
+npx quasar build
 ```
 
-
-### Lint the files
-```bash
-yarn lint
-# or
-npm run lint
-```
-
-
-### Format the files
-```bash
-yarn format
-# or
-npm run format
-```
-
-
-### Build the app for production
-```bash
-quasar build
-```
-
-### Customize the configuration
-See [Configuring quasar.config.js](https://v2.quasar.dev/quasar-cli-vite/quasar-config-js).
+Результат сборки: `dist/spa`.

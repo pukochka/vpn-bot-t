@@ -1,6 +1,5 @@
 import { Dark } from 'quasar';
 import { boot } from 'quasar/wrappers';
-import config from 'src/utils/config';
 import { VpnService } from 'src/api/vpn';
 import { useVpnStore } from 'stores/vpnStore';
 import vXssHtml from 'src/utils/vXssHtml';
@@ -8,7 +7,7 @@ import vXssHtml from 'src/utils/vXssHtml';
 export default boot(({ app }) => {
   const vpn = useVpnStore();
 
-  Dark.set(config.dark);
+  Dark.set(window.Telegram.WebApp.colorScheme === 'dark');
 
   app.directive('xss-html', vXssHtml);
 
@@ -21,9 +20,7 @@ export default boot(({ app }) => {
       vpn.prises = responseSettings.data.data?.tariff_cost;
       vpn.freeShow = responseSettings.data.data?.free_show;
     })
-    .catch(() => {
-      vpn.error = true;
-    })
+    .catch(() => {})
     .finally(() => {
       vpn.loading = false;
     });

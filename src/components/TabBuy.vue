@@ -49,7 +49,6 @@ import {
   mdiShieldCheck,
   mdiSpeedometer,
   mdiTabletCellphone,
-  mdiVpn,
   mdiWifiLock,
 } from '@quasar/extras/mdi-v7';
 import { Dark } from 'quasar';
@@ -60,7 +59,6 @@ const content = [
   { label: 'Безопасный серфинг', icon: mdiShieldCheck },
   { label: 'Анонимность', icon: mdiIncognito },
   { label: 'Максимальная скорость', icon: mdiSpeedometer },
-  { label: 'Обход блокировок', icon: mdiVpn },
   { label: 'Защита в общественных сетях', icon: mdiWifiLock },
   { label: '3 устройства для подключения', icon: mdiTabletCellphone },
 ];

@@ -1,4 +1,3 @@
-import config from 'src/utils/config';
 import { colors, LocalStorage, setCssVar } from 'quasar';
 
 const palette: Record<number, string> = {
@@ -42,7 +41,10 @@ export function useColor(id: number) {
 
   setCssVar('primary', color);
 
-  setCssVar('primary', lighten(getPaletteColor('primary'), config.dark ? 30 : 0));
+  setCssVar(
+    'primary',
+    lighten(getPaletteColor('primary'), window.Telegram.WebApp.colorScheme === 'dark' ? 30 : 0),
+  );
 
   LocalStorage.set('theme', id);
 }
