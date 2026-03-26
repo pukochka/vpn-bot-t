@@ -1,5 +1,8 @@
 {
-  "domain": "https://vpnhigh.su/",
+  "domain": [
+    "https://vpnhigh.su/",
+    "https://link.telegram-planet.ru/"
+  ],
   "authDomain": "https://api.bot-t.com/v1/",
   "botId": null,
   "publicKey": null
