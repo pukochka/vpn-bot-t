@@ -1,7 +1,7 @@
 import setting from '../../config.json';
 import { getQueryParam } from 'src/utils/string';
 
-const DEFAULT_DOMAIN = 'https://vpnhigh.su/';
+const DEFAULT_DOMAIN = 'https://vpnhigh.su';
 const domainCandidates = Array.isArray(setting.domain)
   ? setting.domain
   : [setting.domain || DEFAULT_DOMAIN];

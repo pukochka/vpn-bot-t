@@ -4,7 +4,7 @@ import { useDialog } from 'src/utils/useDialog';
 import config, { getNextBackendUrl } from 'src/utils/config';
 
 export const instance = axios.create({
-  baseURL: config.url,
+  baseURL: config.url + '/api/v1/key-activate/',
   headers: { Accept: 'application/json' },
 });
 
@@ -36,8 +36,8 @@ instance.interceptors.response.use(
       const nextBackend = getNextBackendUrl();
 
       if (nextBackend) {
-        instance.defaults.baseURL = nextBackend;
-        config.url = nextBackend;
+        instance.defaults.baseURL = nextBackend + '/api/v1/key-activate/';
+        config.url = nextBackend + '/api/v1/key-activate/';
         originalRequest._backendFallbackAttempts = fallbackAttempts + 1;
 
         return instance(originalRequest);
