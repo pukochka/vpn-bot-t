@@ -12,7 +12,7 @@ declare interface VpnKey {
   traffic_limit_gb: number;
   finish_at: string;
   activated_at: string;
-  status: string;
+  status: number;
   status_text: string;
   is_free: boolean;
 }

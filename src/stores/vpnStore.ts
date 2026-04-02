@@ -30,11 +30,8 @@ export const useVpnStore = defineStore('vpn', {
     userTgId: (state: VpnModels) => state.user.user.telegram_id,
     secretKey: (state: VpnModels) => state.user.secret_user_key,
 
-    totalActive: (state: VpnModels) =>
-      state.orders.filter(
-        (order) => order.status !== '0' && Date.now() < Number(order.finish_at) * 1000,
-      ).length,
-    totalDisable: (state: VpnModels) => state.orders.filter((order) => order.status !== '1').length,
+    totalActive: (state: VpnModels) => state.orders.filter((order) => order.status !== 0).length,
+    totalDisable: (state: VpnModels) => state.orders.filter((order) => order.status !== 1).length,
   },
 
   actions: {

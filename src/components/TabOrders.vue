@@ -99,11 +99,7 @@ const pages = computed(() => Math.ceil(filterPages.value[filter.value] / 5));
 
 const filtered = computed(() =>
   vpn.orders
-    .filter(
-      (order) =>
-        order.status !== filter.value &&
-        (filter.value === '0' ? Date.now() < Number(order.finish_at) * 1000 : true),
-    )
+    .filter((order) => order.status !== Number(filter.value))
     .filter((_, index) => index < 5 * vpn.page && index >= 5 * (vpn.page - 1)),
 );
 
