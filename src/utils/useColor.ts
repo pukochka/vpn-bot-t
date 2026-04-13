@@ -38,13 +38,11 @@ import getPaletteColor = colors.getPaletteColor;
 
 export function useColor(id: number) {
   const color = palette[id] || '#d80032';
+  const isDarkTheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
   setCssVar('primary', color);
 
-  setCssVar(
-    'primary',
-    lighten(getPaletteColor('primary'), window.Telegram.WebApp.colorScheme === 'dark' ? 30 : 0),
-  );
+  setCssVar('primary', lighten(getPaletteColor('primary'), isDarkTheme ? 30 : 0));
 
   LocalStorage.set('theme', id);
 }

@@ -176,7 +176,7 @@ a {
 }
 
 @each $name, $color in $gradients {
-  .bg-gradient--#{$name} {
+  .bg-gradient--#{'' + $name} {
     background: #{$color} !important;
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);

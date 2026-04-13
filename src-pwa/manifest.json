@@ -1,0 +1,25 @@
+{
+  "name": "BOT-T VPN Module",
+  "short_name": "BOT-T VPN",
+  "description": "VPN Mini App with PWA support",
+  "display": "standalone",
+  "orientation": "portrait",
+  "start_url": "/",
+  "scope": "/",
+  "background_color": "#121212",
+  "theme_color": "#d80032",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/maskable-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

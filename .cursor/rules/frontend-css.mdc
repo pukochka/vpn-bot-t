@@ -1,0 +1,9 @@
+---
+description: Кастомный CSS только в frontend/src/css
+globs: frontend/**/*
+alwaysApply: false
+---
+
+# CSS фронтенда
+
+Весь кастомный CSS приложения пишется **только** в `frontend/src/css` (SCSS: частичные файлы вида `_*.scss`, подключение через `app.scss`, `pages.scss`, `components/_index.scss` и т.д.). В компонентах `.vue` не добавлять блоки `<style>` с правилами приложения — только классы в шаблоне и при необходимости инлайн-стили через `:style`. Подробности разметки и скрипта — в `vue-quasar-style.mdc`.

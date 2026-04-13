@@ -1,5 +1,12 @@
 <template>
   <div class="text-h6 q-pa-md">Ваши ключи</div>
+  <q-banner
+    rounded
+    inline-actions
+    class="q-mx-md q-mb-sm rounded transparent-style q-card--bordered text-body2"
+  >
+    Заказы хранятся только локально в этом браузере и не переносятся на другие устройства.
+  </q-banner>
 
   <q-tabs
     v-if="vpn.orders.length"
@@ -46,7 +53,25 @@
         </q-item>
       </div>
 
-      <q-btn flat no-caps class="rounded" icon="more_vert" @click="openDetails(order)" />
+      <q-btn
+        v-if="isAwaitingPayment(order)"
+        flat
+        no-caps
+        class="rounded"
+        icon="close"
+        color="negative"
+        :loading="cancellingOrderKey === order.key"
+        :disable="cancellingOrderKey !== null"
+        @click="cancelOrder(order)"
+      />
+      <q-btn
+        flat
+        no-caps
+        class="rounded"
+        icon="more_vert"
+        :disable="cancellingOrderKey !== null"
+        @click="openDetails(order)"
+      />
     </div>
 
     <div
@@ -78,14 +103,25 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { useVpnStore } from 'stores/vpnStore';
 import { date } from 'quasar';
 import { months } from 'stores/vpnModels';
+import {
+  PaymentOrderService,
+  savePaymentOrderContext,
+  type PaymentOrderStatusData,
+} from 'src/api/paymentOrder';
+import config, { getBotIdNumber } from 'src/utils/config';
+import { upsertOrder } from 'src/utils/ordersIndexedDb';
+import { useDialog } from 'src/utils/useDialog';
 
 const vpn = useVpnStore();
+const router = useRouter();
 
 const search = ref('');
 const filter = ref<'-' | '0' | '1'>('-');
+const cancellingOrderKey = ref<string | null>(null);
 
 const filterPages = computed(
   (): Record<'-' | '0' | '1', number> => ({
@@ -141,8 +177,165 @@ const next = () => {
   vpn.page++;
 };
 
-const openDetails = (order: VpnKey) => {
+const isAwaitingPayment = (order: VpnKey): boolean => {
+  const statusText = String(order.status_text || '')
+    .trim()
+    .toLowerCase();
+  if (statusText.includes('ожидает оплат')) return true;
+  if (statusText.includes('awaiting payment')) return true;
+  if (statusText.includes('pending payment')) return true;
+  if (String(order.payment_status || '').trim().toLowerCase() === 'wait') return true;
+
+  return false;
+};
+
+const resolvePaymentOrderId = (order: VpnKey): string | null => {
+  const normalizeOrderId = (raw: unknown): string | null => {
+    if (typeof raw === 'string') {
+      const trimmed = raw.trim();
+      if (/^o-\d+$/i.test(trimmed)) return `o-${trimmed.replace(/^o-/i, '')}`;
+      if (/^\d+$/.test(trimmed)) return `o-${trimmed}`;
+    }
+    if (typeof raw === 'number' && Number.isInteger(raw) && raw > 0) {
+      return `o-${raw}`;
+    }
+    return null;
+  };
+
+  return (
+    normalizeOrderId(order.order_id) ||
+    normalizeOrderId(order.id) ||
+    normalizeOrderId(order.key) ||
+    null
+  );
+};
+
+const parseNumberOrNull = (value: unknown): number | null => {
+  const parsed =
+    typeof value === 'number'
+      ? value
+      : typeof value === 'string' && value.trim()
+        ? Number(value)
+        : NaN;
+
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+const buildCancelledOrder = (
+  order: VpnKey,
+  statusData?: PaymentOrderStatusData | null,
+): VpnKey => {
+  const statusNumber = parseNumberOrNull(statusData?.status);
+  const statusText =
+    typeof statusData?.status_text === 'string' && statusData.status_text.trim()
+      ? statusData.status_text.trim()
+      : 'Отменен';
+  const paymentStatus =
+    typeof statusData?.payment_status === 'string' && statusData.payment_status.trim()
+      ? statusData.payment_status.trim()
+      : 'cancelled';
+  const nextConfigUrl =
+    typeof statusData?.config_url === 'string' && statusData.config_url.trim()
+      ? statusData.config_url.trim()
+      : order.config_url;
+  const finishAt = parseNumberOrNull(statusData?.finish_at);
+  const activatedAt = parseNumberOrNull(statusData?.activated_at);
+  const trafficLimit = parseNumberOrNull(statusData?.traffic_limit);
+  const trafficLimitGb = parseNumberOrNull(statusData?.traffic_limit_gb);
+
+  return {
+    ...order,
+    status: statusNumber !== null ? Math.floor(statusNumber) : 0,
+    status_text: statusText,
+    payment_status: paymentStatus,
+    config_url: nextConfigUrl,
+    ...(finishAt !== null ? { finish_at: String(Math.floor(finishAt)) } : {}),
+    ...(activatedAt !== null ? { activated_at: String(Math.floor(activatedAt)) } : {}),
+    ...(trafficLimit !== null ? { traffic_limit: Math.floor(trafficLimit) } : {}),
+    ...(trafficLimitGb !== null ? { traffic_limit_gb: trafficLimitGb } : {}),
+  };
+};
+
+const openDetails = async (order: VpnKey) => {
+  if (isAwaitingPayment(order)) {
+    const orderId = resolvePaymentOrderId(order);
+    if (!orderId) {
+      useDialog('Не удалось определить ID заказа');
+      return;
+    }
+
+    const botId = getBotIdNumber() || Number(config.bot_id);
+    if (!botId) {
+      useDialog('Не удалось определить bot_id');
+      return;
+    }
+
+    try {
+      const statusResponse = await PaymentOrderService.getStatus({
+        bot_id: botId,
+        order_id: orderId,
+      });
+      if (!statusResponse.result) {
+        useDialog(statusResponse.message || 'Не удалось открыть страницу оплаты');
+        return;
+      }
+    } catch (error) {
+      useDialog(error instanceof Error ? error.message : 'Не удалось открыть страницу оплаты');
+      return;
+    }
+
+    await savePaymentOrderContext({
+      bot_id: botId,
+      order_id: orderId,
+    });
+
+    await router.push({
+      path: '/payment',
+      query: {
+        bot_id: String(botId || config.bot_id),
+        order_id: orderId,
+      },
+    });
+    return;
+  }
+
   vpn.selectedOrder = order;
   vpn.openModal('order');
+};
+
+const cancelOrder = async (order: VpnKey) => {
+  const orderId = resolvePaymentOrderId(order);
+  if (!orderId) {
+    useDialog('Не удалось определить ID заказа для отмены');
+    return;
+  }
+
+  const botId = getBotIdNumber() || Number(config.bot_id);
+  if (!botId) {
+    useDialog('Не удалось определить bot_id для отмены заказа');
+    return;
+  }
+
+  try {
+    cancellingOrderKey.value = order.key;
+
+    const response = await PaymentOrderService.cancel({
+      bot_id: botId,
+      order_id: orderId,
+    });
+
+    if (!response.result) {
+      throw new Error(response.message || 'Не удалось отменить заказ');
+    }
+
+    const updatedOrder = buildCancelledOrder(order, response.data);
+    await upsertOrder(updatedOrder);
+    vpn.addOrder(updatedOrder);
+    useDialog('Заказ отменен');
+  } catch (error) {
+    useDialog(error instanceof Error ? error.message : 'Ошибка отмены заказа');
+  } finally {
+    cancellingOrderKey.value = null;
+  }
 };
 </script>

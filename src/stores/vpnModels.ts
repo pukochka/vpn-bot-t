@@ -6,13 +6,11 @@ export interface VpnModels {
   modals: Record<ModalNames, boolean>;
   selectedPeriod: string;
 
-  user: User;
   prises: string;
 
   page: number;
   limit: number;
   total: number;
-  freeShow: number;
 
   orders: Array<VpnKey>;
   selectedOrder: VpnKey | null;
@@ -20,7 +18,7 @@ export interface VpnModels {
   instructions: { success: boolean; sections: Array<VpnInstruction>; support_text: string };
 }
 
-export type ModalNames = 'free' | 'order' | 'buy';
+export type ModalNames = 'order' | 'buy';
 
 export const defaultKey: VpnKey = {
   key: '',
@@ -29,29 +27,9 @@ export const defaultKey: VpnKey = {
   traffic_limit_gb: 0,
   finish_at: '',
   activated_at: '',
-  status: '',
+  status: 0,
   status_text: '',
   is_free: false,
-};
-
-export const defaultUser: User = {
-  id: 0,
-  bot_id: 0,
-  user: {
-    id: 0,
-    telegram_id: 0,
-    username: '',
-    first_name: '',
-    last_name: '',
-    link: '',
-    type: '',
-  },
-  ref: null,
-  money: 0,
-  status: 0,
-  create_at: 0,
-  update_at: 0,
-  secret_user_key: '',
 };
 
 export const months = [

@@ -10,10 +10,6 @@
         <tab-buy></tab-buy>
       </q-tab-panel>
 
-      <q-tab-panel name="profile" class="q-pa-none col column justify-evenly overflow-hidden">
-        <tab-profile></tab-profile>
-      </q-tab-panel>
-
       <q-tab-panel name="orders" class="q-pa-none col column overflow-hidden">
         <tab-orders></tab-orders>
       </q-tab-panel>
@@ -26,29 +22,37 @@
 </template>
 
 <script setup lang="ts">
-import { VpnService } from 'src/api/vpn';
+import { onMounted } from 'vue';
+import { getAllOrders } from 'src/utils/ordersIndexedDb';
 import { useVpnStore } from 'stores/vpnStore';
 
 import TabBuy from 'components/TabBuy.vue';
 import TabInfo from 'components/TabInfo.vue';
 import TabOrders from 'components/TabOrders.vue';
-import TabProfile from 'components/TabProfile.vue';
 
 const vpn = useVpnStore();
 
-const updatePanel = async () => {
-  if (vpn.tab !== 'profile' && vpn.orders.length) return;
-
+const loadLocalOrders = async () => {
   try {
     vpn.loadingOrders = true;
+    const orders = await getAllOrders();
 
-    const response = await VpnService.orders(vpn.user.user.telegram_id, vpn.user.secret_user_key);
-
-    vpn.total = response.data.data.total;
-    vpn.orders = response.data.data.keys;
+    vpn.setOrders(orders);
   } catch {
   } finally {
     vpn.loadingOrders = false;
   }
 };
+
+const updatePanel = async (nextTab?: string | number) => {
+  const tab = nextTab || vpn.tab;
+
+  if (tab !== 'orders' && tab !== 'profile') return;
+
+  await loadLocalOrders();
+};
+
+onMounted(async () => {
+  await loadLocalOrders();
+});
 </script>

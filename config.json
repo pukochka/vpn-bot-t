@@ -5,7 +5,12 @@
     "https://link.telegram-planet.ru",
     "https://vagrus.space"
   ],
-  "authDomain": "https://api.bot-t.com/v1/",
   "botId": null,
-  "publicKey": null
+  "publicKey": null,
+  "shopCategoryMap": {
+    "1": 2404191,
+    "3": 2430913,
+    "6": 2430913,
+    "12": 2497990
+  }
 }

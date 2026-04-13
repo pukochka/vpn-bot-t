@@ -1,14 +1,4 @@
 <template>
-  <q-item v-if="vpn.freeShow === 1" clickable class="vpn-card" @click="vpn.openModal('free')">
-    <div class="absolute-full bg-gradient--green"></div>
-
-    <q-item-section class="z-5">
-      <q-item-label class="text-center text-h6 text-weight-bold"> Ваш бесплатный VPN </q-item-label>
-
-      <q-item-label class="text-center">Выдача доступна каждый месяц</q-item-label>
-    </q-item-section>
-  </q-item>
-
   <q-item clickable class="vpn-card info q-my-sm" @click="buyHalfYear">
     <div class="absolute-full bg-gradient--brand"></div>
 

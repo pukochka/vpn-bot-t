@@ -1,6 +1,6 @@
 <template>
   <q-dialog persistent position="bottom" v-model="vpn.modals.order">
-    <q-card class="modal-rounded modal-responsive">
+    <q-card flat bordered class="modal-rounded modal-responsive">
       <modal-top>Детали заказа</modal-top>
 
       <q-card-section class="q-pt-none">

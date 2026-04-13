@@ -1,10 +1,10 @@
 import axios from 'axios';
 import type { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { useDialog } from 'src/utils/useDialog';
-import config, { getNextBackendUrl } from 'src/utils/config';
+import { getApiV1Url } from 'src/utils/config';
 
 export const instance = axios.create({
-  baseURL: config.url + '/api/v1/key-activate/',
+  baseURL: getApiV1Url(),
   headers: { Accept: 'application/json' },
 });
 
@@ -23,27 +23,7 @@ instance.interceptors.response.use(
     // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
     return Promise.reject();
   },
-  async function (error) {
-    const originalRequest = error.config as AxiosRequestConfig & {
-      _backendFallbackAttempts?: number;
-    };
-    const fallbackAttempts = originalRequest?._backendFallbackAttempts || 0;
-    const maxFallbackAttempts = Math.max(config.backends.length - 1, 0);
-    const canRetryWithFallback =
-      fallbackAttempts < maxFallbackAttempts && (!error.response || error.response.status >= 500);
-
-    if (canRetryWithFallback) {
-      const nextBackend = getNextBackendUrl();
-
-      if (nextBackend) {
-        instance.defaults.baseURL = nextBackend + '/api/v1/key-activate/';
-        config.url = nextBackend + '/api/v1/key-activate/';
-        originalRequest._backendFallbackAttempts = fallbackAttempts + 1;
-
-        return instance(originalRequest);
-      }
-    }
-
+  function (error) {
     if (!error.response || error.response.status !== 200 || !error.response.data.result) {
       useDialog(error.response?.data?.message || 'Ошибка');
     }
