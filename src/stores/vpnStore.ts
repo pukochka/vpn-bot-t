@@ -24,6 +24,9 @@ export const useVpnStore = defineStore('vpn', {
     limit: 5,
     total: 0,
     freeShow: 1,
+
+    color: 2,
+    heading: 'VPN',
   }),
 
   getters: {

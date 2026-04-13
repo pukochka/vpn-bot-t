@@ -8,6 +8,8 @@ export interface VpnModels {
 
   user: User;
   prises: string;
+  color: number;
+  heading: string;
 
   page: number;
   limit: number;
@@ -29,7 +31,7 @@ export const defaultKey: VpnKey = {
   traffic_limit_gb: 0,
   finish_at: '',
   activated_at: '',
-  status: '',
+  status: 0,
   status_text: '',
   is_free: false,
 };

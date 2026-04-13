@@ -16,7 +16,9 @@
           />
         </div>
 
-        <div class="text-h6 text-weight-bold text-center q-pa-sm col">VPN</div>
+        <div class="text-h6 text-weight-bold text-center q-pa-sm col">
+          {{ vpn.heading || 'VPN' }}
+        </div>
 
         <div class="col row justify-end">
           <q-btn

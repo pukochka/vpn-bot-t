@@ -1,8 +1,8 @@
 <template>
   <q-item v-if="vpn.freeShow === 1" clickable class="vpn-card" @click="vpn.openModal('free')">
-    <div class="absolute-full bg-gradient--green"></div>
+    <div class="absolute-full bg-gradient--theme-card-1"></div>
 
-    <q-item-section class="z-5">
+    <q-item-section class="z-5 text-white">
       <q-item-label class="text-center text-h6 text-weight-bold"> Ваш бесплатный VPN </q-item-label>
 
       <q-item-label class="text-center">Выдача доступна каждый месяц</q-item-label>
@@ -10,20 +10,22 @@
   </q-item>
 
   <q-item clickable class="vpn-card info q-my-sm" @click="buyHalfYear">
-    <div class="absolute-full bg-gradient--brand"></div>
+    <div class="absolute-full bg-gradient--theme-card-2"></div>
 
     <q-item-section class="z-5">
-      <q-item-label class="text-center text-h6 text-weight-bold"> Лучший VPN </q-item-label>
+      <q-item-label class="text-center text-h6 text-weight-bold text-white">
+        Лучший VPN
+      </q-item-label>
 
       <q-item-label class="row justify-center">
         <q-list dense>
           <q-item :key="item.label" v-for="item of content">
             <q-item-section side>
-              <q-icon :name="item.icon" :color="Dark.isActive ? 'white' : 'black'" size="26px" />
+              <q-icon :name="item.icon" color="white" size="26px" />
             </q-item-section>
 
             <q-item-section>
-              <q-item-label class="text-left q-pt-xs text-body1">
+              <q-item-label class="text-left text-white q-pt-xs text-body1">
                 {{ item.label }}
               </q-item-label>
             </q-item-section>
@@ -34,10 +36,10 @@
   </q-item>
 
   <q-item clickable class="vpn-card" @click="vpn.openModal('buy')">
-    <div class="absolute-full bg-gradient--primary"></div>
+    <div class="absolute-full bg-gradient--theme-card-3"></div>
 
     <q-item-section class="z-5">
-      <q-item-label class="text-h5 text-weight-bold">Купить</q-item-label>
+      <q-item-label class="text-h5 text-weight-bold text-white">Купить</q-item-label>
     </q-item-section>
   </q-item>
 </template>
