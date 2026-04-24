@@ -16,7 +16,7 @@
           />
         </div>
 
-        <div class="text-h6 text-weight-bold text-center q-pa-sm col">
+        <div class="text-h6 text-weight-bold text-center q-pa-sm col text-no-wrap">
           {{ vpn.heading || 'VPN' }}
         </div>
 
