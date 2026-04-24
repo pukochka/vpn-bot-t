@@ -12,7 +12,7 @@ declare const self: ServiceWorkerGlobalScope & {
 };
 
 const OFFLINE_PAGE_URL = '/offline.html';
-const OFFLINE_CACHE_NAME = 'offline-cache-v3';
+const OFFLINE_CACHE_NAME = 'offline-cache-v4';
 const SETTINGS_API_PATTERN = /^https:\/\/api\.bot-t\.com\/v1\/bot-module\/settings/;
 const INSTRUCTIONS_API_PATTERN = /\/api\/v1\/key-activate\/vpn-instructions/;
 
@@ -48,15 +48,29 @@ registerRoute(
       request.destination === 'script' ||
       request.destination === 'worker'),
   new StaleWhileRevalidate({
-    cacheName: 'static-resources-v1',
+    cacheName: 'static-resources-v2',
+  }),
+);
+
+// Шрифты: обновления из нового деплоя подтягиваются быстрее, чем у «тяжёлых» картинок.
+registerRoute(
+  ({ request, sameOrigin }) => sameOrigin && request.destination === 'font',
+  new StaleWhileRevalidate({
+    cacheName: 'font-resources-v2',
+    plugins: [
+      new CacheableResponsePlugin({ statuses: [0, 200] }),
+      new ExpirationPlugin({
+        maxEntries: 40,
+        maxAgeSeconds: 60 * 60 * 24 * 90,
+      }),
+    ],
   }),
 );
 
 registerRoute(
-  ({ request, sameOrigin }) =>
-    sameOrigin && (request.destination === 'image' || request.destination === 'font'),
+  ({ request, sameOrigin }) => sameOrigin && request.destination === 'image',
   new CacheFirst({
-    cacheName: 'media-resources-v1',
+    cacheName: 'media-images-v2',
     plugins: [
       new CacheableResponsePlugin({ statuses: [0, 200] }),
       new ExpirationPlugin({
@@ -70,7 +84,7 @@ registerRoute(
 registerRoute(
   ({ request, url }) => request.method === 'GET' && SETTINGS_API_PATTERN.test(url.href),
   new NetworkFirst({
-    cacheName: 'api-settings-v1',
+    cacheName: 'api-settings-v2',
     networkTimeoutSeconds: 2,
     plugins: [
       new CacheableResponsePlugin({ statuses: [0, 200] }),
@@ -85,7 +99,7 @@ registerRoute(
 registerRoute(
   ({ request, url }) => request.method === 'GET' && INSTRUCTIONS_API_PATTERN.test(url.href),
   new NetworkFirst({
-    cacheName: 'api-instructions-v1',
+    cacheName: 'api-instructions-v2',
     networkTimeoutSeconds: 2,
     plugins: [
       new CacheableResponsePlugin({ statuses: [0, 200] }),

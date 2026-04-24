@@ -21,6 +21,7 @@ const config = {
   public_key:
     setting.publicKey || getQueryParam('public_key') || '086c6e666b6fd472113bda91a27567b1',
   shopCategoryMap: normalizedShopCategoryMap,
+  instructions: setting.instructions,
 };
 
 export const getBotIdNumber = (): number => {

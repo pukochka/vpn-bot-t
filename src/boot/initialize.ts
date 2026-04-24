@@ -1,3 +1,5 @@
+import '@fontsource-variable/geom';
+
 import { Dark, LocalStorage } from 'quasar';
 import { boot } from 'quasar/wrappers';
 import { useVpnStore } from 'stores/vpnStore';

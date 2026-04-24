@@ -7,37 +7,9 @@
 
 @font-face {
   font-family: 'Geometria';
-  src: url('Geometria-ThinItalic.ttf') ;
-  font-weight: 100;
-  font-style: italic;
-}
-
-@font-face {
-  font-family: 'Geometria';
-  src: url('Geometria-ExtraLight.ttf') ;
-  font-weight: 200;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Geometria';
-  src: url('Geometria-ExtraLightItalic.ttf') ;
-  font-weight: 200;
-  font-style: italic;
-}
-
-@font-face {
-  font-family: 'Geometria';
   src: url('Geometria-Light.ttf') ;
   font-weight: 300;
   font-style: normal;
-}
-
-@font-face {
-  font-family: 'Geometria';
-  src: url('Geometria-LightItalic.ttf') ;
-  font-weight: 300;
-  font-style: italic;
 }
 
 @font-face {
@@ -79,33 +51,5 @@
   font-family: 'Geometria';
   src: url('Geometria-BoldItalic.ttf') ;
   font-weight: bold;
-  font-style: italic;
-}
-
-@font-face {
-  font-family: 'Geometria';
-  src: url('Geometria-ExtraBold.ttf') ;
-  font-weight: 700;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Geometria';
-  src: url('Geometria-ExtraBoldItalic.ttf') ;
-  font-weight: 700;
-  font-style: italic;
-}
-
-@font-face {
-  font-family: 'Geometria';
-  src: url('Geometria-Heavy.ttf') ;
-  font-weight: 800;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Geometria';
-  src: url('Geometria-HeavyItalic.ttf') ;
-  font-weight: 800;
   font-style: italic;
 }

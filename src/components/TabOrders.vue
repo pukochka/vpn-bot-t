@@ -3,9 +3,11 @@
   <q-banner
     rounded
     inline-actions
-    class="q-mx-md q-mb-sm rounded transparent-style q-card--bordered text-body2"
+    class="q-mx-md q-mb-sm rounded transparent-style q-card--bordered"
   >
-    Заказы хранятся только локально в этом браузере и не переносятся на другие устройства.
+    <div class="text-body1">
+      Заказы хранятся только локально в этом устройстве и не переносятся на другие устройства.
+    </div>
   </q-banner>
 
   <q-tabs
@@ -184,7 +186,12 @@ const isAwaitingPayment = (order: VpnKey): boolean => {
   if (statusText.includes('ожидает оплат')) return true;
   if (statusText.includes('awaiting payment')) return true;
   if (statusText.includes('pending payment')) return true;
-  if (String(order.payment_status || '').trim().toLowerCase() === 'wait') return true;
+  if (
+    String(order.payment_status || '')
+      .trim()
+      .toLowerCase() === 'wait'
+  )
+    return true;
 
   return false;
 };
@@ -221,10 +228,7 @@ const parseNumberOrNull = (value: unknown): number | null => {
   return Number.isFinite(parsed) ? parsed : null;
 };
 
-const buildCancelledOrder = (
-  order: VpnKey,
-  statusData?: PaymentOrderStatusData | null,
-): VpnKey => {
+const buildCancelledOrder = (order: VpnKey, statusData?: PaymentOrderStatusData | null): VpnKey => {
   const statusNumber = parseNumberOrNull(statusData?.status);
   const statusText =
     typeof statusData?.status_text === 'string' && statusData.status_text.trim()

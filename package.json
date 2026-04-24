@@ -14,9 +14,11 @@
     "dev:pwa": "quasar dev -m pwa",
     "build": "quasar build",
     "build:pwa": "quasar build -m pwa",
-    "postinstall": "quasar prepare"
+    "icons:pwa": "node ./scripts/create-pwa-pngs.mjs",
+    "postinstall": "quasar prepare && node ./scripts/create-pwa-pngs.mjs"
   },
   "dependencies": {
+    "@fontsource-variable/geom": "^5.2.1",
     "@quasar/extras": "^1.16.4",
     "axios": "^1.2.1",
     "pinia": "^3.0.1",
@@ -24,6 +26,8 @@
     "vue": "^3.4.18",
     "vue-i18n": "^11.0.0",
     "vue-router": "^4.0.12",
+    "workbox-cacheable-response": "^7.4.0",
+    "workbox-expiration": "^7.4.0",
     "xss": "^1.0.15"
   },
   "devDependencies": {
