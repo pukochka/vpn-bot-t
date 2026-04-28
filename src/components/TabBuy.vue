@@ -1,60 +1,94 @@
 <template>
-  <q-item clickable class="vpn-card info q-my-sm" @click="buyHalfYear">
-    <div class="absolute-full bg-gradient--brand"></div>
+  <q-card flat bordered class="transparent-style rounded relative-position overflow-hidden q-mb-sm">
+    <q-list dense padding>
+      <q-item :key="item.label" v-for="item of content">
+        <q-item-section side>
+          <CustomEmoji
+            loop
+            autoplay
+            :size="48"
+            :src="item.icon"
+            :key="`${item.label}-${bootEpoch}`"
+          />
+        </q-item-section>
 
-    <q-item-section class="z-5">
-      <q-item-label class="text-center text-h6 text-weight-bold"> Лучший VPN </q-item-label>
+        <q-item-section>
+          <q-item-label class="text-left q-pt-xs text-body1 text-italic">
+            {{ item.label }}
+          </q-item-label>
+        </q-item-section>
+      </q-item>
+    </q-list>
+  </q-card>
 
-      <q-item-label class="row justify-center">
-        <q-list dense>
-          <q-item :key="item.label" v-for="item of content">
-            <q-item-section side>
-              <q-icon :name="item.icon" :color="Dark.isActive ? 'white' : 'black'" size="26px" />
-            </q-item-section>
-
-            <q-item-section>
-              <q-item-label class="text-left q-pt-xs text-body1">
-                {{ item.label }}
-              </q-item-label>
-            </q-item-section>
-          </q-item>
-        </q-list>
-      </q-item-label>
-    </q-item-section>
-  </q-item>
-
-  <q-item clickable class="vpn-card" @click="vpn.openModal('buy')">
-    <div class="absolute-full bg-gradient--primary"></div>
-
-    <q-item-section class="z-5">
-      <q-item-label class="text-h5 text-weight-bold">Купить</q-item-label>
-    </q-item-section>
-  </q-item>
+  <buy-section></buy-section>
 </template>
 
 <script setup lang="ts">
-import { useVpnStore } from 'stores/vpnStore';
-import {
-  mdiIncognito,
-  mdiShieldCheck,
-  mdiSpeedometer,
-  mdiTabletCellphone,
-  mdiWifiLock,
-} from '@quasar/extras/mdi-v7';
-import { Dark } from 'quasar';
+import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 
-const vpn = useVpnStore();
+import CustomEmoji from 'src/components/emoji/CustomEmoji.vue';
+import BuySection from 'components/BuySection.vue';
+
+const unlockUrl = new URL('../assets/Unlock.tgs', import.meta.url).href;
+const diamondUrl = new URL('../assets/Question.tgs', import.meta.url).href;
+const speedUrl = new URL('../assets/Speed.tgs', import.meta.url).href;
+const defendUrl = new URL('../assets/Defend.tgs', import.meta.url).href;
+const linkUrl = new URL('../assets/Earth.tgs', import.meta.url).href;
+
+const buyCardRef = ref<HTMLElement | null>(null);
+const bootEpoch = ref(0);
+let remountTimer: ReturnType<typeof setTimeout> | undefined;
+let layoutObserver: ResizeObserver | null = null;
 
 const content = [
-  { label: 'Безопасный серфинг', icon: mdiShieldCheck },
-  { label: 'Анонимность', icon: mdiIncognito },
-  { label: 'Максимальная скорость', icon: mdiSpeedometer },
-  { label: 'Защита в общественных сетях', icon: mdiWifiLock },
-  { label: '3 устройства для подключения', icon: mdiTabletCellphone },
+  { label: 'Безопасный серфинг', icon: linkUrl },
+  { label: 'Анонимность', icon: diamondUrl },
+  { label: 'Максимальная скорость', icon: speedUrl },
+  { label: 'Защита в общественных сетях', icon: defendUrl },
+  { label: '3 устройства для подключения', icon: unlockUrl },
 ];
 
-const buyHalfYear = () => {
-  vpn.selectedPeriod = '6';
-  vpn.openModal('buy');
-};
+function bumpStickerMount() {
+  bootEpoch.value += 1;
+}
+
+function scheduleLayoutRemount() {
+  void nextTick(() => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        bumpStickerMount();
+      });
+    });
+  });
+}
+
+onMounted(() => {
+  scheduleLayoutRemount();
+
+  remountTimer = window.setTimeout(() => {
+    bumpStickerMount();
+  }, 450);
+
+  void nextTick(() => {
+    const el = buyCardRef.value;
+    if (el && typeof ResizeObserver !== 'undefined') {
+      layoutObserver = new ResizeObserver(() => {
+        const r = el.getBoundingClientRect();
+        if (r.width > 8 && r.height > 8) {
+          bumpStickerMount();
+          layoutObserver?.disconnect();
+          layoutObserver = null;
+        }
+      });
+      layoutObserver.observe(el);
+    }
+  });
+});
+
+onBeforeUnmount(() => {
+  layoutObserver?.disconnect();
+  layoutObserver = null;
+  window.clearTimeout(remountTimer);
+});
 </script>

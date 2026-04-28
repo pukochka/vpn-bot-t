@@ -1,12 +1,12 @@
 <template>
-  <q-page class="padding-page column">
+  <q-page class="padding-page">
     <q-tab-panels
       animated
-      class="bg-transparent bm-fit--container-content q-tab-grow"
+      class="bg-transparent q-tab-grow q-pa-none"
       @before-transition="updatePanel"
       v-model="vpn.tab"
     >
-      <q-tab-panel name="buy" class="q-pa-none col column justify-evenly overflow-hidden">
+      <q-tab-panel name="buy" class="q-pa-none overflow-hidden">
         <tab-buy></tab-buy>
       </q-tab-panel>
 

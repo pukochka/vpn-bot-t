@@ -8,6 +8,10 @@ export const instance = axios.create({
   headers: { Accept: 'application/json' },
 });
 
+export const syncApiBaseUrl = (): void => {
+  instance.defaults.baseURL = getApiV1Url();
+};
+
 instance.interceptors.request.use(function (request) {
   return request;
 });

@@ -1,43 +1,52 @@
 <template>
-  <div class="text-h6 q-pa-md">Ваши ключи</div>
-  <q-banner
-    rounded
-    inline-actions
-    class="q-mx-md q-mb-sm rounded transparent-style q-card--bordered"
+  <div class="text-h6 q-py-sm">
+    Ваши ключи
+
+    <CustomEmoji loop autoplay :size="48" :src="keysUrl" />
+  </div>
+  <q-card
+    flat
+    bordered
+    class="transparent-style row no-wrap rounded relative-position overflow-hidden q-pa-sm q-px-md q-mb-sm"
   >
-    <div class="text-body1">
+    <CustomEmoji loop autoplay :size="48" :src="infoUrl" />
+
+    <div class="q-pl-sm">
       Заказы хранятся только локально в этом устройстве и не переносятся на другие устройства.
     </div>
-  </q-banner>
+  </q-card>
 
-  <q-tabs
-    v-if="vpn.orders.length"
-    dense
-    no-caps
-    align="justify"
-    content-class="row"
-    class="rounded transparent-style q-card--bordered"
-    @update:model-value="vpn.page = 1"
-    v-model="filter"
-  >
-    <div class="col">
-      <q-tab name="-" label="Все" />
-    </div>
-    <div class="col">
-      <q-tab name="0" label="Активные" />
-    </div>
-    <div class="col">
-      <q-tab name="1" label="Просроченные" />
-    </div>
-  </q-tabs>
+  <q-card flat bordered class="transparent-style rounded">
+    <q-tabs
+      v-if="vpn.orders.length"
+      dense
+      no-caps
+      align="justify"
+      content-class="row"
+      @update:model-value="vpn.page = 1"
+      v-model="filter"
+    >
+      <div class="col">
+        <q-tab name="-" label="Все" />
+      </div>
+      <div class="col">
+        <q-tab name="0" label="Активные" />
+      </div>
+      <div class="col">
+        <q-tab name="1" label="Истекшие" />
+      </div>
+    </q-tabs>
+  </q-card>
 
-  <q-list class="q-gutter-y-sm q-pt-md">
-    <div
-      class="transparent-style q-card--bordered rounded overflow-hidden row items-stretch"
+  <div class="q-gutter-y-sm q-pt-sm">
+    <q-card
+      flat
+      bordered
+      class="transparent-style rounded relative-position overflow-hidden row no-wrap"
       :key="order.key"
       v-for="order in filtered"
     >
-      <div class="col-grow">
+      <div class="col">
         <q-item>
           <q-item-section>
             <q-item-label>{{ finish(order) }}</q-item-label>
@@ -55,29 +64,34 @@
         </q-item>
       </div>
 
-      <q-btn
-        v-if="isAwaitingPayment(order)"
-        flat
-        no-caps
-        class="rounded"
-        icon="close"
-        color="negative"
-        :loading="cancellingOrderKey === order.key"
-        :disable="cancellingOrderKey !== null"
-        @click="cancelOrder(order)"
-      />
-      <q-btn
-        flat
-        no-caps
-        class="rounded"
-        icon="more_vert"
-        :disable="cancellingOrderKey !== null"
-        @click="openDetails(order)"
-      />
-    </div>
+      <q-separator vertical />
+
+      <div class="column">
+        <q-btn
+          v-if="isAwaitingPayment(order)"
+          flat
+          no-caps
+          class="col"
+          icon="close"
+          color="red-14"
+          :loading="cancellingOrderKey === order.key"
+          :disable="cancellingOrderKey !== null"
+          @click="cancelOrder(order)"
+        />
+
+        <q-btn
+          flat
+          no-caps
+          class="col"
+          icon="more_vert"
+          :disable="cancellingOrderKey !== null"
+          @click="openDetails(order)"
+        />
+      </div>
+    </q-card>
 
     <div
-      v-if="vpn.orders.length"
+      v-if="vpn.orders.length > 3"
       class="row rounded items-center transparent-style q-card--bordered overflow-hidden"
     >
       <q-btn flat square class="col" icon="chevron_left" @click="prev" />
@@ -97,10 +111,10 @@
       <q-btn flat square class="col" icon="chevron_right" @click="next" />
     </div>
 
-    <div class="text-center text-h6 text-weight-bold" v-else>
+    <div class="text-center text-h6 text-weight-bold" v-if="!vpn.orders.length">
       У Вас пока нет купленных ключей...
     </div>
-  </q-list>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -117,6 +131,10 @@ import {
 import config, { getBotIdNumber } from 'src/utils/config';
 import { upsertOrder } from 'src/utils/ordersIndexedDb';
 import { useDialog } from 'src/utils/useDialog';
+import { CustomEmoji } from 'components/emoji';
+
+const keysUrl = new URL('../assets/Passkeys.tgs', import.meta.url).href;
+const infoUrl = new URL('../assets/DoubleInfo.tgs', import.meta.url).href;
 
 const vpn = useVpnStore();
 const router = useRouter();

@@ -9,12 +9,16 @@ import { ExpirationPlugin } from 'workbox-expiration';
 
 declare const self: ServiceWorkerGlobalScope & {
   __WB_MANIFEST: Array<string | { url: string; revision: string | null }>;
+  __WB_DISABLE_DEV_LOGS?: boolean;
 };
 
 const OFFLINE_PAGE_URL = '/offline.html';
 const OFFLINE_CACHE_NAME = 'offline-cache-v4';
 const SETTINGS_API_PATTERN = /^https:\/\/api\.bot-t\.com\/v1\/bot-module\/settings/;
 const INSTRUCTIONS_API_PATTERN = /\/api\/v1\/key-activate\/vpn-instructions/;
+
+// Suppress noisy Workbox console logs during development.
+self.__WB_DISABLE_DEV_LOGS = true;
 
 void self.skipWaiting();
 clientsClaim();
@@ -75,6 +79,76 @@ registerRoute(
       new CacheableResponsePlugin({ statuses: [0, 200] }),
       new ExpirationPlugin({
         maxEntries: 120,
+        maxAgeSeconds: 60 * 60 * 24 * 30,
+      }),
+    ],
+  }),
+);
+
+/** RLottie WASM/JS из `public/emoji/` */
+registerRoute(
+  ({ request, url, sameOrigin }) =>
+    request.method === 'GET' &&
+    sameOrigin &&
+    (url.pathname === '/emoji/rlottie-wasm.wasm' || url.pathname === '/emoji/rlottie-wasm.js'),
+  new StaleWhileRevalidate({
+    cacheName: 'vpn-emoji-wasm-v1',
+    plugins: [
+      new CacheableResponsePlugin({ statuses: [0, 200] }),
+      new ExpirationPlugin({
+        maxEntries: 6,
+        maxAgeSeconds: 60 * 60 * 24 * 90,
+      }),
+    ],
+  }),
+);
+
+/** Custom emoji `.tgs` с storage (prod). */
+registerRoute(
+  ({ request, url }) =>
+    request.method === 'GET' &&
+    url.hostname === 'storage.bot-market.com' &&
+    url.pathname.includes('/custom-emoji/'),
+  new CacheFirst({
+    cacheName: 'vpn-sw-custom-emoji-storage-v1',
+    plugins: [
+      new CacheableResponsePlugin({ statuses: [0, 200] }),
+      new ExpirationPlugin({
+        maxEntries: 200,
+        maxAgeSeconds: 60 * 60 * 24 * 14,
+      }),
+    ],
+  }),
+);
+
+/** Dev: прокси `/bots_catalog/...` → storage. */
+registerRoute(
+  ({ request, url, sameOrigin }) =>
+    request.method === 'GET' &&
+    sameOrigin &&
+    url.pathname.startsWith('/bots_catalog/custom-emoji'),
+  new CacheFirst({
+    cacheName: 'vpn-sw-custom-emoji-dev-v1',
+    plugins: [
+      new CacheableResponsePlugin({ statuses: [0, 200] }),
+      new ExpirationPlugin({
+        maxEntries: 200,
+        maxAgeSeconds: 60 * 60 * 24 * 14,
+      }),
+    ],
+  }),
+);
+
+/** Локальные `.tgs` из сборки (Vite assets). */
+registerRoute(
+  ({ request, url, sameOrigin }) =>
+    request.method === 'GET' && sameOrigin && url.pathname.endsWith('.tgs'),
+  new CacheFirst({
+    cacheName: 'vpn-sw-tgs-assets-v1',
+    plugins: [
+      new CacheableResponsePlugin({ statuses: [0, 200] }),
+      new ExpirationPlugin({
+        maxEntries: 80,
         maxAgeSeconds: 60 * 60 * 24 * 30,
       }),
     ],

@@ -1,12 +1,20 @@
 {
   "domain": [
-    "https://vpn-telegram.com",
-    "https://vpnhigh.su",
-    "https://link.telegram-planet.ru",
-    "https://vagrus.space"
+    "https://vpnhigh.su"
   ],
+  "color": 1,
   "botId": null,
   "publicKey": null,
+  "cache": {
+    "emojiTtlDays": 5,
+    "apiGetTtlMinutes": 30
+  },
+  "proxyStars": {
+    "enabled": true,
+    "customEmojiStorageBase": "https://storage.bot-market.com/bots_catalog/custom-emoji",
+    "customEmojiDevProxyBase": "/bots_catalog/custom-emoji",
+    "tgsIds": ["earth"]
+  },
   "shopCategoryMap": {
     "1": 2404191,
     "3": 2430913,

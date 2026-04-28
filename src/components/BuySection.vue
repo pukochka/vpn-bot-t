@@ -1,102 +1,98 @@
 <template>
-  <q-dialog persistent position="bottom" v-model="vpn.modals.buy">
-    <q-card flat bordered class="modal-rounded modal-responsive relative-position overflow-hidden">
-      <modal-top :class="[searching ? 'z-max' : '']">Купить</modal-top>
+  <div class="relative-position">
+    <q-card flat bordered class="rounded transparent-style overflow-hidden">
+      <div class="text-center q-py-sm">Выберите количество дней</div>
 
-      <q-card-section class="q-pt-none">
-        <div class="rounded transparent-style q-card--bordered overflow-hidden">
-          <div class="text-center text-caption q-py-sm">Выберите количество дней</div>
+      <q-tabs inline-label align="justify" class="tab-rounded" v-model="vpn.selectedPeriod">
+        <q-tab class="rounded" :key="key" :name="key" v-for="(period, key) of periods">
+          <div class="text-h6 text-weight-bold">{{ period }}</div>
+        </q-tab>
+      </q-tabs>
+    </q-card>
 
-          <q-tabs inline-label align="justify" class="tab-rounded" v-model="vpn.selectedPeriod">
-            <q-tab class="rounded" :key="key" :name="key" v-for="(period, key) of periods">
-              <div class="text-h6 text-weight-bold">{{ period }}</div>
-            </q-tab>
-          </q-tabs>
-        </div>
+    <div class="text-center q-my-sm q-py-sm rounded price-total-shell">
+      <transition name="price-bg-flow">
+        <div
+          :key="`price-bg-${vpn.selectedPeriod}`"
+          class="price-total-bg"
+          :style="priceGradientStyle"
+        />
+      </transition>
 
-        <div class="text-center q-my-md q-py-sm rounded price-total-shell">
-          <transition name="price-bg-flow">
-            <div
-              :key="`price-bg-${vpn.selectedPeriod}`"
-              class="price-total-bg brand"
-              :class="['bg-gradient--' + alphabetColor(vpn.selectedPeriod)]"
-            />
-          </transition>
+      <div class="price-total-content">
+        <div>Итого</div>
 
-          <div class="price-total-content">
-            <div class="text-caption">Итого</div>
-
-            <div class="price-total-value">
-              <span class="price-counter" aria-live="polite">
-                <span
-                  v-for="slot in rollingPriceSlots"
-                  :key="slot.id"
-                  class="price-counter__slot"
-                  :class="{ 'price-counter__slot--static': !slot.isDigit }"
-                >
-                  <span v-if="slot.isDigit" class="price-counter__digit-window">
-                    <span class="price-counter__digit-strip" :style="slotTransformStyle(slot)">
-                      <span v-for="(digit, idx) in digitStrip" :key="`${slot.id}-${idx}`" class="price-counter__digit">
-                        {{ digit }}
-                      </span>
-                    </span>
+        <div class="price-total-value">
+          <span class="price-counter" aria-live="polite">
+            <span
+              v-for="slot in rollingPriceSlots"
+              :key="slot.id"
+              class="price-counter__slot"
+              :class="{ 'price-counter__slot--static': !slot.isDigit }"
+            >
+              <span v-if="slot.isDigit" class="price-counter__digit-window">
+                <span class="price-counter__digit-strip" :style="slotTransformStyle(slot)">
+                  <span
+                    v-for="(digit, idx) in digitStrip"
+                    :key="`${slot.id}-${idx}`"
+                    class="price-counter__digit"
+                  >
+                    {{ digit }}
                   </span>
-
-                  <span v-else class="price-counter__static">{{ slot.staticChar }}</span>
                 </span>
               </span>
-              <span class="text-h5 text-weight-bold">₽</span>
-            </div>
-          </div>
+
+              <span v-else class="price-counter__static">{{ slot.staticChar }}</span>
+            </span>
+          </span>
+          <span class="text-h5 text-weight-bold">₽</span>
         </div>
-      </q-card-section>
+      </div>
+    </div>
 
-      <modal-bottom no-top-space>
-        <q-btn
-          no-caps
-          unelevated
-          label="Купить"
-          class="rounded col q-card--bordered"
-          :loading="searching"
-          :disable="searching"
-          @click="buyPeriod"
-        />
-      </modal-bottom>
-
-      <transition name="search-fade">
-        <div v-if="searching" class="modal-buy-searching-overlay column flex-center">
-          <div class="search-visual">
-            <div class="search-orbit" aria-hidden="true">
-              <span
-                v-for="n in 8"
-                :key="n"
-                class="search-orbit-dot"
-                :style="{ '--orbit-i': n - 1 }"
-              />
-            </div>
-            <div class="search-core">
-              <q-icon :name="mdiServerNetwork" size="34px" class="search-core-icon" />
-            </div>
-            <div class="search-pulse search-pulse--a" />
-            <div class="search-pulse search-pulse--b" />
-          </div>
-
-          <transition name="phrase-slide" mode="out-in">
-            <p :key="phraseIndex" class="search-phrase text-center q-px-md q-mt-lg">
-              {{ phrases[phraseIndex] }}
-            </p>
-          </transition>
-        </div>
-      </transition>
+    <q-card flat bordered class="row transparent-style rounded overflow-hidden">
+      <q-btn
+        no-caps
+        unelevated
+        class="col"
+        label="Купить"
+        :loading="searching"
+        :disable="searching"
+        @click="buyPeriod"
+      />
     </q-card>
-  </q-dialog>
+
+    <transition name="search-fade">
+      <div v-if="searching" class="modal-buy-searching-overlay column flex-center">
+        <div class="search-visual">
+          <div class="search-orbit" aria-hidden="true">
+            <span
+              v-for="n in 8"
+              :key="n"
+              class="search-orbit-dot"
+              :style="{ '--orbit-i': n - 1 }"
+            />
+          </div>
+          <div class="search-core">
+            <q-icon name="dns" size="34px" class="search-core-icon" />
+          </div>
+          <div class="search-pulse search-pulse--a" />
+          <div class="search-pulse search-pulse--b" />
+        </div>
+
+        <transition name="phrase-slide" mode="out-in">
+          <p :key="phraseIndex" class="search-phrase text-center q-px-md q-mt-lg">
+            {{ phrases[phraseIndex] }}
+          </p>
+        </transition>
+      </div>
+    </transition>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { mdiServerNetwork } from '@quasar/extras/mdi-v7';
-
 import { VpnService } from 'src/api/vpn';
 import {
   PaymentOrderService,
@@ -106,12 +102,8 @@ import {
 import { upsertOrder } from 'src/utils/ordersIndexedDb';
 import { periods } from 'stores/vpnModels';
 import { useVpnStore } from 'stores/vpnStore';
-import { alphabetColor } from 'src/utils/useColor';
 import config, { getBotIdNumber, getCategoryIdByPeriod } from 'src/utils/config';
 import { useDialog } from 'src/utils/useDialog';
-
-import ModalTop from './sections/ModalTop.vue';
-import ModalBottom from './sections/ModalBottom.vue';
 
 const vpn = useVpnStore();
 const router = useRouter();
@@ -155,6 +147,43 @@ const price = computed(
   () =>
     Object.fromEntries(vpn.prises.split(',').map((item) => item.split('-')))[vpn.selectedPeriod],
 );
+const parsedPriceByPeriod = computed<Record<string, number>>(() => {
+  const entries = vpn.prises
+    .split(',')
+    .map((item) => item.split('-'))
+    .filter((entry): entry is [string, string] => entry.length === 2)
+    .map(([period, rawPrice]) => [period, toPriceNumber(rawPrice)] as const);
+
+  return Object.fromEntries(entries);
+});
+const selectedPrice = computed(() => parsedPriceByPeriod.value[vpn.selectedPeriod] ?? 0);
+const priceGradientIntensity = computed(() => {
+  const values = Object.values(parsedPriceByPeriod.value).filter((value) => value > 0);
+  if (values.length <= 1) return 0.35;
+
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  if (max === min) return 0.35;
+
+  const normalized = (selectedPrice.value - min) / (max - min);
+  return Math.max(0, Math.min(1, normalized));
+});
+const priceGradientStyle = computed<Record<string, string>>(() => {
+  // Делаем шкалу нелинейной, чтобы переход между ценами был заметно резче.
+  const intensity = Math.pow(priceGradientIntensity.value, 1.6);
+
+  const start = 10 + intensity * 36;
+  const end = 26 + intensity * 62;
+  const accent = 6 + intensity * 34;
+  const darkMix = 2 + intensity * 20;
+
+  return {
+    '--price-grad-start': `${start.toFixed(2)}%`,
+    '--price-grad-end': `${end.toFixed(2)}%`,
+    '--price-grad-accent': `${accent.toFixed(2)}%`,
+    '--price-grad-dark-mix': `${darkMix.toFixed(2)}%`,
+  };
+});
 
 type RollingPriceSlot = {
   id: string;
@@ -424,6 +453,18 @@ const buyPeriod = async () => {
   position: absolute;
   inset: 0;
   will-change: opacity, filter;
+  background: linear-gradient(
+    138deg,
+    color-mix(in srgb, var(--q-primary) var(--price-grad-start, 20%), #ffffff),
+    color-mix(
+      in srgb,
+      var(--q-primary) var(--price-grad-end, 56%),
+      #0f172a var(--price-grad-dark-mix, 8%)
+    )
+  );
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #ffffff 65%, transparent),
+    0 8px 20px color-mix(in srgb, var(--q-primary) var(--price-grad-accent, 12%), transparent);
 }
 
 .price-total-content {

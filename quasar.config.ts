@@ -60,7 +60,25 @@ export default defineConfig((ctx) => {
       // polyfillModulePreload: true,
       // distDir
 
-      // extendViteConf (viteConf) {},
+      /** Как в emoji-hub: `.tgs` как статический ассет для `import url from '…tgs?url'`. */
+      extendViteConf(viteConf) {
+        const include = viteConf.assetsInclude;
+        const tgsPattern = '**/*.tgs';
+
+        if (Array.isArray(include)) {
+          if (!include.includes(tgsPattern)) {
+            include.push(tgsPattern);
+          }
+          return;
+        }
+
+        if (!include) {
+          viteConf.assetsInclude = [tgsPattern];
+          return;
+        }
+
+        viteConf.assetsInclude = [include, tgsPattern];
+      },
       // viteVuePluginOptions: {},
 
       vitePlugins: [
@@ -87,6 +105,14 @@ export default defineConfig((ctx) => {
     devServer: {
       // https: true,
       open: true, // opens browser window automatically
+      /** Custom emoji `.tgs` с storage (см. `proxyStars.customEmojiDevProxyBase` в config.json). */
+      proxy: {
+        '/bots_catalog': {
+          target: 'https://storage.bot-market.com',
+          changeOrigin: true,
+          secure: true,
+        },
+      },
     },
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#framework

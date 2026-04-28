@@ -1,6 +1,6 @@
 <template>
   <div class="rounded transparent-style q-card--bordered q-pa-sm">
-    <div v-xss-html="config.instructions"></div>
+    <div class="block" style="line-height: 15px" v-xss-html="config.instructions"></div>
   </div>
 </template>
 

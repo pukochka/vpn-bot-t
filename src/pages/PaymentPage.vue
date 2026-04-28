@@ -39,7 +39,9 @@
 
       <q-card flat bordered v-if="paid" class="rounded q-pa-lg payment-block">
         <div class="text-h6 text-weight-bold q-mb-sm">Заказ успешно оплачен</div>
+
         <div class="text-body2 payment-muted q-mb-md">Можно вернуться на главный экран.</div>
+
         <q-btn
           no-caps
           unelevated
@@ -51,7 +53,18 @@
 
       <template v-else>
         <q-card flat bordered class="rounded q-pa-lg q-mb-md payment-block">
+          <div class="payment-step-title">
+            Для сохранения заказа не только в приложении, введите Email
+          </div>
+
+          <q-card flat bordered class="rounded overflow-hidden transparent-style q-mt-sm">
+            <q-input dense class="q-px-md" label="Email" v-model="email"></q-input>
+          </q-card>
+        </q-card>
+
+        <q-card flat bordered class="rounded q-pa-lg q-mb-md payment-block">
           <div class="payment-step-title">Шаг 1. Выберите группу оплаты</div>
+
           <div class="row q-col-gutter-sm q-mt-sm">
             <div v-for="group in groups" :key="group.id" class="col-12 col-sm-6">
               <q-btn
@@ -282,6 +295,7 @@ const groups = ref<Array<PaymentGroup>>([]);
 const items = ref<Array<PaymentItem>>([]);
 const payData = ref<PaymentPayData | null>(null);
 
+const email = ref('');
 const selectedGroupId = ref<number | null>(null);
 const selectedItemId = ref<number | null>(null);
 const payInputValue = ref('');

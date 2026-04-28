@@ -18,9 +18,9 @@
     "postinstall": "quasar prepare && node ./scripts/create-pwa-pngs.mjs"
   },
   "dependencies": {
-    "@fontsource-variable/geom": "^5.2.1",
     "@quasar/extras": "^1.16.4",
-    "axios": "^1.2.1",
+    "axios": "1.15.0",
+    "fflate": "^0.8.2",
     "pinia": "^3.0.1",
     "quasar": "^2.16.0",
     "vue": "^3.4.18",

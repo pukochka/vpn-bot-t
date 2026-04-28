@@ -4,7 +4,7 @@
       <q-icon name="check" v-if="copied && !noIcon" />
 
       <div class="" v-else-if="!copied && !noIcon">
-        <q-icon :name="mdiContentCopy" />
+        <q-icon name="content_copy" />
       </div>
     </transition>
 
@@ -24,7 +24,6 @@ import type { QBtnProps } from 'quasar';
 import { copyToClipboard } from 'quasar';
 
 import { useNotify } from 'src/utils/useNotify';
-import { mdiContentCopy } from '@quasar/extras/mdi-v7';
 
 const props = withDefaults(defineProps<CopyButtonProps>(), {
   text: '',
