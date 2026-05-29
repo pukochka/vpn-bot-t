@@ -3,7 +3,7 @@
 import { clientsClaim } from 'workbox-core';
 import { matchPrecache, precacheAndRoute, cleanupOutdatedCaches } from 'workbox-precaching';
 import { NavigationRoute, registerRoute } from 'workbox-routing';
-import { CacheFirst, NetworkFirst, StaleWhileRevalidate } from 'workbox-strategies';
+import { CacheFirst, StaleWhileRevalidate } from 'workbox-strategies';
 import { CacheableResponsePlugin } from 'workbox-cacheable-response';
 import { ExpirationPlugin } from 'workbox-expiration';
 
@@ -14,8 +14,6 @@ declare const self: ServiceWorkerGlobalScope & {
 
 const OFFLINE_PAGE_URL = '/offline.html';
 const OFFLINE_CACHE_NAME = 'offline-cache-v4';
-const SETTINGS_API_PATTERN = /^https:\/\/api\.bot-t\.com\/v1\/bot-module\/settings/;
-const INSTRUCTIONS_API_PATTERN = /\/api\/v1\/key-activate\/vpn-instructions/;
 
 // Suppress noisy Workbox console logs during development.
 self.__WB_DISABLE_DEV_LOGS = true;
@@ -150,36 +148,6 @@ registerRoute(
       new ExpirationPlugin({
         maxEntries: 80,
         maxAgeSeconds: 60 * 60 * 24 * 30,
-      }),
-    ],
-  }),
-);
-
-registerRoute(
-  ({ request, url }) => request.method === 'GET' && SETTINGS_API_PATTERN.test(url.href),
-  new NetworkFirst({
-    cacheName: 'api-settings-v2',
-    networkTimeoutSeconds: 2,
-    plugins: [
-      new CacheableResponsePlugin({ statuses: [0, 200] }),
-      new ExpirationPlugin({
-        maxEntries: 20,
-        maxAgeSeconds: 60 * 60 * 6,
-      }),
-    ],
-  }),
-);
-
-registerRoute(
-  ({ request, url }) => request.method === 'GET' && INSTRUCTIONS_API_PATTERN.test(url.href),
-  new NetworkFirst({
-    cacheName: 'api-instructions-v2',
-    networkTimeoutSeconds: 2,
-    plugins: [
-      new CacheableResponsePlugin({ statuses: [0, 200] }),
-      new ExpirationPlugin({
-        maxEntries: 20,
-        maxAgeSeconds: 60 * 15,
       }),
     ],
   }),

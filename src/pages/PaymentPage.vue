@@ -40,7 +40,23 @@
       <q-card flat bordered v-if="paid" class="rounded q-pa-lg payment-block">
         <div class="text-h6 text-weight-bold q-mb-sm">Заказ успешно оплачен</div>
 
-        <div class="text-body2 payment-muted q-mb-md">Можно вернуться на главный экран.</div>
+        <div class="text-body2 payment-muted q-mb-md" v-if="paidConfigUrl">
+          Ваш VPN-ключ готов. Перейдите по ссылке для настройки.
+        </div>
+
+        <div class="text-body2 payment-muted q-mb-md" v-else>
+          Можно вернуться на главный экран.
+        </div>
+
+        <q-btn
+          v-if="paidConfigUrl"
+          no-caps
+          unelevated
+          target="_blank"
+          class="rounded payment-btn payment-btn--primary q-mb-sm"
+          label="Открыть конфигурацию"
+          :href="paidConfigUrl"
+        />
 
         <q-btn
           no-caps
@@ -52,16 +68,6 @@
       </q-card>
 
       <template v-else>
-        <q-card flat bordered class="rounded q-pa-lg q-mb-md payment-block">
-          <div class="payment-step-title">
-            Для сохранения заказа не только в приложении, введите Email
-          </div>
-
-          <q-card flat bordered class="rounded overflow-hidden transparent-style q-mt-sm">
-            <q-input dense class="q-px-md" label="Email" v-model="email"></q-input>
-          </q-card>
-        </q-card>
-
         <q-card flat bordered class="rounded q-pa-lg q-mb-md payment-block">
           <div class="payment-step-title">Шаг 1. Выберите группу оплаты</div>
 
@@ -267,6 +273,7 @@ import {
   PaymentOrderService,
   clearStoredPaymentOrderContext,
   getStoredPaymentOrderContext,
+  normalizeOrderId,
   savePaymentOrderContext,
   type PaymentGroup,
   type PaymentItem,
@@ -274,8 +281,8 @@ import {
   type PaymentPayData,
   type StoredPaymentOrderContext,
 } from 'src/api/paymentOrder';
-import config, { getBotIdNumber } from 'src/utils/config';
 import { useDialog } from 'src/utils/useDialog';
+import { parseOrderAmountToKopecks } from 'src/utils/orderAmount';
 import { getAllOrders, upsertOrder } from 'src/utils/ordersIndexedDb';
 import { useVpnStore } from 'stores/vpnStore';
 
@@ -288,6 +295,7 @@ const initialLoading = ref(false);
 const paid = ref(false);
 const errorMessage = ref('');
 const amount = ref<number | null>(null);
+const paidConfigUrl = ref('');
 const storedOrderContext = ref<StoredPaymentOrderContext | null>(null);
 const fallbackOrderId = ref('');
 
@@ -295,7 +303,6 @@ const groups = ref<Array<PaymentGroup>>([]);
 const items = ref<Array<PaymentItem>>([]);
 const payData = ref<PaymentPayData | null>(null);
 
-const email = ref('');
 const selectedGroupId = ref<number | null>(null);
 const selectedItemId = ref<number | null>(null);
 const payInputValue = ref('');
@@ -322,34 +329,6 @@ const getQueryString = (value: unknown): string => {
 
   return '';
 };
-
-const normalizeOrderId = (value: unknown): string => {
-  const rawValue = getQueryString(value).trim();
-  if (!rawValue) return '';
-  if (/^o-\d+$/i.test(rawValue)) {
-    return `o-${rawValue.replace(/^o-/i, '')}`;
-  }
-  if (/^\d+$/.test(rawValue)) {
-    return `o-${rawValue}`;
-  }
-  return '';
-};
-
-const botId = computed(() => {
-  const fromQuery = Number(getQueryString(route.query.bot_id));
-
-  if (Number.isInteger(fromQuery) && fromQuery > 0) {
-    return fromQuery;
-  }
-
-  if (storedOrderContext.value?.bot_id) {
-    return storedOrderContext.value.bot_id;
-  }
-
-  const fromConfig = getBotIdNumber();
-
-  return fromConfig > 0 ? fromConfig : Number(config.bot_id) || 0;
-});
 
 const orderId = computed(
   () =>
@@ -395,11 +374,6 @@ const setError = (message: string) => {
 };
 
 const validateInput = (): boolean => {
-  if (!botId.value) {
-    setError('Не найден bot_id');
-    return false;
-  }
-
   if (!orderId.value) {
     setError('Не найден order_id для продолжения оплаты');
     return false;
@@ -408,11 +382,22 @@ const validateInput = (): boolean => {
   return true;
 };
 
-const applyStatus = (statusData?: { status?: string; amount?: number }) => {
+const applyStatus = (statusData?: {
+  status?: string;
+  amount?: number | string;
+  config_url?: string;
+}) => {
   if (!statusData) return;
 
-  if (typeof statusData.amount === 'number') {
-    amount.value = statusData.amount;
+  if (statusData.amount !== undefined && statusData.amount !== null) {
+    const kopecks = parseOrderAmountToKopecks(statusData.amount);
+    if (kopecks !== null) {
+      amount.value = kopecks;
+    }
+  }
+
+  if (typeof statusData.config_url === 'string' && statusData.config_url.trim()) {
+    paidConfigUrl.value = statusData.config_url.trim();
   }
 
   paid.value = statusData.status === 'paid';
@@ -432,16 +417,29 @@ const parseNumberOrNull = (value: unknown): number | null => {
 const resolveOrderKeyFromAny = (order: Partial<VpnKey>): string =>
   normalizeOrderId(order.order_id) || normalizeOrderId(order.id) || normalizeOrderId(order.key);
 
+const resolveStatusNumber = (
+  status: unknown,
+  fallback: { isPaid: boolean },
+): number => {
+  if (status === 'paid') return 1;
+  if (status === 'pending') return 0;
+
+  const parsed = parseNumberOrNull(status);
+  if (parsed !== null) return Math.floor(parsed);
+
+  return fallback.isPaid ? 1 : 0;
+};
+
 const buildStatusPatch = (
   statusData: PaymentOrderStatusData,
   fallback: { statusText: string; paymentStatus: string; isPaid: boolean },
 ): Partial<VpnKey> => {
-  const nextStatus = parseNumberOrNull(statusData.status);
   const trafficLimit = parseNumberOrNull(statusData.traffic_limit);
   const trafficLimitGb = parseNumberOrNull(statusData.traffic_limit_gb);
   const finishAt = parseNumberOrNull(statusData.finish_at);
   const activatedAt = parseNumberOrNull(statusData.activated_at);
   const configUrl = typeof statusData.config_url === 'string' ? statusData.config_url.trim() : '';
+  const keyValue = typeof statusData.key === 'string' && statusData.key.trim() ? statusData.key.trim() : '';
   const statusText =
     typeof statusData.status_text === 'string' && statusData.status_text.trim()
       ? statusData.status_text.trim()
@@ -449,12 +447,15 @@ const buildStatusPatch = (
   const paymentStatus =
     typeof statusData.payment_status === 'string' && statusData.payment_status.trim()
       ? statusData.payment_status.trim()
-      : fallback.paymentStatus;
+      : typeof statusData.status === 'string' && statusData.status.trim()
+        ? statusData.status.trim()
+        : fallback.paymentStatus;
 
   return {
-    status: nextStatus !== null ? Math.floor(nextStatus) : fallback.isPaid ? 1 : 0,
+    status: resolveStatusNumber(statusData.status, fallback),
     status_text: statusText,
     payment_status: paymentStatus,
+    ...(keyValue ? { key: keyValue } : {}),
     ...(configUrl ? { config_url: configUrl } : {}),
     ...(trafficLimit !== null ? { traffic_limit: Math.floor(trafficLimit) } : {}),
     ...(trafficLimitGb !== null ? { traffic_limit_gb: trafficLimitGb } : {}),
@@ -532,21 +533,12 @@ const goHomeToOrders = async () => {
 };
 
 const syncOrderQueryWithState = async () => {
-  const queryBotId = Number(getQueryString(route.query.bot_id));
   const queryOrderId = getQueryString(route.query.order_id);
-  const hasCorrectQuery =
-    Number.isInteger(queryBotId) &&
-    queryBotId > 0 &&
-    queryOrderId === orderId.value &&
-    queryBotId === botId.value;
-
-  if (hasCorrectQuery) return;
+  if (queryOrderId === orderId.value) return;
 
   await router.replace({
     path: '/payment',
     query: {
-      ...route.query,
-      bot_id: String(botId.value),
       order_id: orderId.value,
     },
   });
@@ -608,21 +600,19 @@ const handlePaidState = async (statusData?: PaymentOrderStatusData): Promise<boo
   });
 
   stopPolling();
-  const redirected = await handleRedirectAction(statusData);
-  if (!redirected) {
-    await goHomeToOrders();
+  if (await handleRedirectAction(statusData)) {
+    return true;
   }
 
   return true;
 };
 
-const fetchStatus = async (): Promise<boolean> => {
-  const response = await PaymentOrderService.getStatus({
-    bot_id: botId.value,
+const fetchCheckPay = async (): Promise<boolean> => {
+  const response = await PaymentOrderService.checkPay({
     order_id: orderId.value,
   });
   if (!response.result) {
-    throw new Error(response.message || 'Не удалось получить статус заказа');
+    throw new Error(response.message || 'Не удалось проверить оплату');
   }
 
   return handlePaidState(response.data);
@@ -630,7 +620,6 @@ const fetchStatus = async (): Promise<boolean> => {
 
 const fetchGroups = async (): Promise<boolean> => {
   const response = await PaymentOrderService.getGroups({
-    bot_id: botId.value,
     order_id: orderId.value,
   });
 
@@ -646,7 +635,6 @@ const fetchGroups = async (): Promise<boolean> => {
 
 const fetchItems = async (groupId: number): Promise<boolean> => {
   const response = await PaymentOrderService.getItems({
-    bot_id: botId.value,
     order_id: orderId.value,
     group_id: groupId,
   });
@@ -663,7 +651,6 @@ const fetchItems = async (groupId: number): Promise<boolean> => {
 
 const fetchPayData = async (itemId: number): Promise<boolean> => {
   const response = await PaymentOrderService.getPayData({
-    bot_id: botId.value,
     order_id: orderId.value,
     item_id: itemId,
   });
@@ -769,7 +756,6 @@ const submitPayInput = async () => {
     paySubmitting.value = true;
     errorMessage.value = '';
     const response = await PaymentOrderService.setPayInput({
-      bot_id: botId.value,
       order_id: orderId.value,
       item_id: selectedItemId.value,
       input_value: payInputValue.value.trim(),
@@ -792,7 +778,6 @@ const checkPayment = async () => {
     checkSubmitting.value = true;
     errorMessage.value = '';
     const response = await PaymentOrderService.checkPay({
-      bot_id: botId.value,
       order_id: orderId.value,
     });
 
@@ -800,9 +785,7 @@ const checkPayment = async () => {
       throw new Error(response.message || 'Не удалось проверить оплату');
     }
 
-    if (await handlePaidState(response.data)) return;
-
-    await fetchStatus();
+    await handlePaidState(response.data);
   } catch (error) {
     setError(error instanceof Error ? error.message : 'Ошибка проверки оплаты');
   } finally {
@@ -817,7 +800,6 @@ const cancelFlow = async () => {
     cancelSubmitting.value = true;
     errorMessage.value = '';
     const response = await PaymentOrderService.cancel({
-      bot_id: botId.value,
       order_id: orderId.value,
     });
     if (!response.result) {
@@ -859,7 +841,7 @@ const startPolling = () => {
       if (isAnyActionPending.value || paid.value) return;
 
       try {
-        await fetchStatus();
+        await fetchCheckPay();
       } catch {
         stopPolling();
       }
@@ -867,10 +849,23 @@ const startPolling = () => {
   }, 7000);
 };
 
+const applyAmountFromCreateResponse = (): void => {
+  const createResponse = storedOrderContext.value?.create_order_response;
+  if (!createResponse || typeof createResponse !== 'object') return;
+
+  const kopecks = parseOrderAmountToKopecks(
+    (createResponse as Record<string, unknown>).amount,
+  );
+  if (kopecks !== null) {
+    amount.value = kopecks;
+  }
+};
+
 const initialize = async () => {
   fallbackOrderId.value = '';
   storedOrderContext.value = await getStoredPaymentOrderContext();
   await resolveFallbackOrderId();
+  applyAmountFromCreateResponse();
 
   if (!validateInput()) return;
 
@@ -878,13 +873,13 @@ const initialize = async () => {
     initialLoading.value = true;
     errorMessage.value = '';
     await savePaymentOrderContext({
-      bot_id: botId.value,
       order_id: orderId.value,
     });
     storedOrderContext.value = await getStoredPaymentOrderContext();
+    applyAmountFromCreateResponse();
     await syncOrderQueryWithState();
 
-    if (await fetchStatus()) return;
+    if (await fetchCheckPay()) return;
 
     if (await fetchGroups()) return;
     startPolling();

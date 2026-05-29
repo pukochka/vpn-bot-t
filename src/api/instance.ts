@@ -3,7 +3,7 @@ import type { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { useDialog } from 'src/utils/useDialog';
 import { getApiV1Url } from 'src/utils/config';
 
-export const instance = axios.create({
+const instance = axios.create({
   baseURL: getApiV1Url(),
   headers: { Accept: 'application/json' },
 });

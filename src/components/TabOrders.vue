@@ -125,10 +125,10 @@ import { date } from 'quasar';
 import { months } from 'stores/vpnModels';
 import {
   PaymentOrderService,
+  normalizeOrderId,
   savePaymentOrderContext,
   type PaymentOrderStatusData,
 } from 'src/api/paymentOrder';
-import config, { getBotIdNumber } from 'src/utils/config';
 import { upsertOrder } from 'src/utils/ordersIndexedDb';
 import { useDialog } from 'src/utils/useDialog';
 import { CustomEmoji } from 'components/emoji';
@@ -215,18 +215,6 @@ const isAwaitingPayment = (order: VpnKey): boolean => {
 };
 
 const resolvePaymentOrderId = (order: VpnKey): string | null => {
-  const normalizeOrderId = (raw: unknown): string | null => {
-    if (typeof raw === 'string') {
-      const trimmed = raw.trim();
-      if (/^o-\d+$/i.test(trimmed)) return `o-${trimmed.replace(/^o-/i, '')}`;
-      if (/^\d+$/.test(trimmed)) return `o-${trimmed}`;
-    }
-    if (typeof raw === 'number' && Number.isInteger(raw) && raw > 0) {
-      return `o-${raw}`;
-    }
-    return null;
-  };
-
   return (
     normalizeOrderId(order.order_id) ||
     normalizeOrderId(order.id) ||
@@ -286,15 +274,8 @@ const openDetails = async (order: VpnKey) => {
       return;
     }
 
-    const botId = getBotIdNumber() || Number(config.bot_id);
-    if (!botId) {
-      useDialog('Не удалось определить bot_id');
-      return;
-    }
-
     try {
-      const statusResponse = await PaymentOrderService.getStatus({
-        bot_id: botId,
+      const statusResponse = await PaymentOrderService.checkPay({
         order_id: orderId,
       });
       if (!statusResponse.result) {
@@ -307,14 +288,12 @@ const openDetails = async (order: VpnKey) => {
     }
 
     await savePaymentOrderContext({
-      bot_id: botId,
       order_id: orderId,
     });
 
     await router.push({
       path: '/payment',
       query: {
-        bot_id: String(botId || config.bot_id),
         order_id: orderId,
       },
     });
@@ -332,17 +311,10 @@ const cancelOrder = async (order: VpnKey) => {
     return;
   }
 
-  const botId = getBotIdNumber() || Number(config.bot_id);
-  if (!botId) {
-    useDialog('Не удалось определить bot_id для отмены заказа');
-    return;
-  }
-
   try {
     cancellingOrderKey.value = order.key;
 
     const response = await PaymentOrderService.cancel({
-      bot_id: botId,
       order_id: orderId,
     });
 

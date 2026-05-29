@@ -1,10 +1,5 @@
 type Any = unknown;
 
-declare interface VpnResponseInstance<T> {
-  data: T;
-  success: boolean;
-}
-
 declare interface VpnKey {
   key: string;
   order_id?: string;
@@ -18,10 +13,4 @@ declare interface VpnKey {
   status_text: string;
   payment_status?: string;
   is_free: boolean;
-}
-
-declare interface VpnInstruction {
-  title: string;
-  steps?: Array<string>;
-  links?: Array<{ title: string; url: string }>;
 }

@@ -4,8 +4,13 @@
       <div class="text-center q-py-sm">Выберите количество дней</div>
 
       <q-tabs inline-label align="justify" class="tab-rounded" v-model="vpn.selectedPeriod">
-        <q-tab class="rounded" :key="key" :name="key" v-for="(period, key) of periods">
-          <div class="text-h6 text-weight-bold">{{ period }}</div>
+        <q-tab
+          class="rounded"
+          :key="product.product_id"
+          :name="String(product.product_id)"
+          v-for="product of vpn.products"
+        >
+          <div class="text-h6 text-weight-bold">{{ product.days }}</div>
         </q-tab>
       </q-tabs>
     </q-card>
@@ -57,10 +62,45 @@
         class="col"
         label="Купить"
         :loading="searching"
-        :disable="searching"
-        @click="buyPeriod"
+        :disable="searching || !vpn.shopSettingsLoaded || !vpn.products.length"
+        @click="openBuyModal"
       />
     </q-card>
+
+    <q-dialog persistent position="bottom" v-model="vpn.modals.buy">
+      <q-card flat bordered class="modal-rounded modal-responsive">
+        <modal-top label="Оформление заказа" />
+
+        <q-card-section class="q-pt-none">
+          <div class="text-body2 q-mb-sm">Введите email для сохранения заказа</div>
+
+          <q-card flat bordered class="rounded overflow-hidden transparent-style">
+            <q-input
+              dense
+              autofocus
+              type="email"
+              class="q-px-md"
+              label="Email"
+              v-model="email"
+              @keyup.enter="buyPeriod"
+            />
+          </q-card>
+        </q-card-section>
+
+        <modal-bottom no-top-space no-close>
+          <q-btn
+            no-caps
+            unelevated
+            color="primary"
+            class="rounded col"
+            label="Продолжить"
+            :loading="searching"
+            :disable="searching || !isEmailValid"
+            @click="buyPeriod"
+          />
+        </modal-bottom>
+      </q-card>
+    </q-dialog>
 
     <transition name="search-fade">
       <div v-if="searching" class="modal-buy-searching-overlay column flex-center">
@@ -94,21 +134,22 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { VpnService } from 'src/api/vpn';
-import {
-  PaymentOrderService,
-  savePaymentOrderContext,
-  type PaymentOrderStatusData,
-} from 'src/api/paymentOrder';
+import { normalizeOrderId, savePaymentOrderContext } from 'src/api/paymentOrder';
 import { upsertOrder } from 'src/utils/ordersIndexedDb';
-import { periods } from 'stores/vpnModels';
 import { useVpnStore } from 'stores/vpnStore';
-import config, { getBotIdNumber, getCategoryIdByPeriod } from 'src/utils/config';
 import { useDialog } from 'src/utils/useDialog';
+
+import ModalTop from 'components/modals/sections/ModalTop.vue';
+import ModalBottom from 'components/modals/sections/ModalBottom.vue';
 
 const vpn = useVpnStore();
 const router = useRouter();
 
 const searching = ref(false);
+const email = ref('');
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const isEmailValid = computed(() => EMAIL_PATTERN.test(email.value.trim()));
 
 const phrases = [
   'Подбираем сервера, это может занять время',
@@ -143,19 +184,16 @@ onBeforeUnmount(() => {
   }
 });
 
-const price = computed(
+const selectedProduct = computed(
   () =>
-    Object.fromEntries(vpn.prises.split(',').map((item) => item.split('-')))[vpn.selectedPeriod],
+    vpn.products.find((product) => String(product.product_id) === vpn.selectedPeriod) ?? null,
 );
-const parsedPriceByPeriod = computed<Record<string, number>>(() => {
-  const entries = vpn.prises
-    .split(',')
-    .map((item) => item.split('-'))
-    .filter((entry): entry is [string, string] => entry.length === 2)
-    .map(([period, rawPrice]) => [period, toPriceNumber(rawPrice)] as const);
-
-  return Object.fromEntries(entries);
-});
+const price = computed(() => String(selectedProduct.value?.price ?? 0));
+const parsedPriceByPeriod = computed<Record<string, number>>(() =>
+  Object.fromEntries(
+    vpn.products.map((product) => [String(product.product_id), product.price] as const),
+  ),
+);
 const selectedPrice = computed(() => parsedPriceByPeriod.value[vpn.selectedPeriod] ?? 0);
 const priceGradientIntensity = computed(() => {
   const values = Object.values(parsedPriceByPeriod.value).filter((value) => value > 0);
@@ -278,22 +316,10 @@ watch(
 );
 
 const resolveOrderId = (orderData: { id?: string | number; order_id?: string }): string | null => {
-  const externalOrderId = orderData.order_id;
-  if (typeof externalOrderId === 'string' && /^o-\d+$/.test(externalOrderId)) {
-    return externalOrderId;
-  }
+  const fromOrderId = normalizeOrderId(orderData.order_id);
+  if (fromOrderId) return fromOrderId;
 
-  const rawId = orderData.id;
-  if (typeof rawId === 'number' && rawId > 0) {
-    return `o-${rawId}`;
-  }
-
-  if (typeof rawId === 'string') {
-    if (/^o-\d+$/.test(rawId)) return rawId;
-    if (/^\d+$/.test(rawId)) return `o-${rawId}`;
-  }
-
-  return null;
+  return normalizeOrderId(orderData.id) || null;
 };
 
 const asRecord = (value: unknown): Record<string, unknown> => {
@@ -337,61 +363,79 @@ const buildLocalOrder = (payload: {
   orderId: string;
   selectedPeriod: string;
   createOrderData: Record<string, unknown>;
-  statusData: PaymentOrderStatusData | null;
 }): VpnKey => {
   const nowSec = Math.floor(Date.now() / 1000);
-  const periodDays = periods[Number(payload.selectedPeriod) as keyof typeof periods] || 30;
-  const fallbackFinishAt = nowSec + periodDays * 24 * 60 * 60;
-  const statusSource = payload.statusData ? asRecord(payload.statusData) : {};
-  const sources = [payload.createOrderData, statusSource];
-  const statusFromData = getFirstNumber(sources, ['status']);
+  const selectedProductDays =
+    vpn.products.find((product) => String(product.product_id) === payload.selectedPeriod)?.days ?? 30;
+  const fallbackFinishAt = nowSec + selectedProductDays * 24 * 60 * 60;
+  const sources = [payload.createOrderData];
+  const statusRaw = getFirstString(sources, ['status']);
   const statusText =
     getFirstString(sources, ['status_text']) ||
-    (payload.statusData?.status === 'paid' ? 'Оплачен' : 'Ожидает оплаты');
+    (statusRaw === 'paid' ? 'Оплачен' : 'Ожидает оплаты');
 
   return {
     key: getFirstString(sources, ['key', 'order_id', 'id']) || payload.orderId,
     order_id: payload.orderId,
-    id: getFirstString(sources, ['id']),
+    id: getFirstString(sources, ['id', 'history_id']),
     config_url: getFirstString(sources, ['config_url', 'configUrl']),
     traffic_limit: getFirstNumber(sources, ['traffic_limit']) || 0,
     traffic_limit_gb: getFirstNumber(sources, ['traffic_limit_gb']) || 0,
     finish_at: String(Math.floor(getFirstNumber(sources, ['finish_at']) || fallbackFinishAt)),
     activated_at: String(Math.floor(getFirstNumber(sources, ['activated_at']) || nowSec)),
-    status:
-      statusFromData !== null
-        ? Math.floor(statusFromData)
-        : payload.statusData?.status === 'paid'
-          ? 1
-          : 0,
+    status: statusRaw === 'paid' ? 1 : 0,
     status_text: statusText,
-    payment_status: payload.statusData?.status || 'wait',
+    payment_status: statusRaw || 'pending',
     is_free: Boolean(payload.createOrderData.is_free),
   };
 };
 
+const openBuyModal = () => {
+  if (!vpn.shopSettingsLoaded || !vpn.products.length) {
+    useDialog('Тарифы ещё не загружены');
+    return;
+  }
+
+  const productId = Number(vpn.selectedPeriod);
+  const selectedProductItem = vpn.products.find((product) => product.product_id === productId);
+
+  if (!selectedProductItem) {
+    useDialog('Выберите тариф');
+    return;
+  }
+
+  vpn.openModal('buy');
+};
+
 const buyPeriod = async () => {
-  const botId = getBotIdNumber();
-  const categoryId = getCategoryIdByPeriod(vpn.selectedPeriod);
-
-  if (!botId) {
-    useDialog('Не удалось определить bot_id для создания заказа');
+  if (!vpn.shopSettingsLoaded || !vpn.products.length) {
+    useDialog('Тарифы ещё не загружены');
     return;
   }
 
-  if (!categoryId) {
-    useDialog(`Для периода ${vpn.selectedPeriod} не настроен category_id в config.json`);
+  const productId = Number(vpn.selectedPeriod);
+  const trimmedEmail = email.value.trim();
+  const selectedProductItem = vpn.products.find((product) => product.product_id === productId);
+
+  if (!selectedProductItem) {
+    useDialog('Выберите тариф');
     return;
   }
+
+  if (!isEmailValid.value) {
+    useDialog('Введите корректный email');
+    return;
+  }
+
+  vpn.closeModal('buy');
 
   try {
     searching.value = true;
     startPhraseRotation();
 
     const response = await VpnService.createShopOrder({
-      bot_id: botId,
-      category_id: categoryId,
-      count: Number(vpn.selectedPeriod),
+      product_id: productId,
+      email: trimmedEmail,
     });
     if (!response?.data?.result) {
       throw new Error(response?.data?.message || 'Не удалось создать заказ');
@@ -404,34 +448,24 @@ const buyPeriod = async () => {
       throw new Error('Сервер не вернул корректный order_id');
     }
 
-    const statusResponse = await PaymentOrderService.getStatus({
-      bot_id: botId,
-      order_id: orderId,
-    });
-    if (!statusResponse.result) {
-      throw new Error(statusResponse.message || 'Не удалось получить статус заказа');
-    }
-    const statusData: PaymentOrderStatusData | null = statusResponse.data;
-
     const localOrder = buildLocalOrder({
       orderId,
       selectedPeriod: vpn.selectedPeriod,
       createOrderData,
-      statusData,
     });
 
     await upsertOrder(localOrder);
     vpn.addOrder(localOrder);
 
     await savePaymentOrderContext({
-      bot_id: botId,
       order_id: orderId,
+      email: trimmedEmail,
       create_order_response: createOrderData,
     });
 
     await router.push({
       path: '/payment',
-      query: { bot_id: String(botId || config.bot_id), order_id: orderId },
+      query: { order_id: orderId },
     });
   } catch (error) {
     useDialog(error instanceof Error ? error.message : 'Не удалось создать заказ');

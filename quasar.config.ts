@@ -104,9 +104,15 @@ export default defineConfig((ctx) => {
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#devserver
     devServer: {
       // https: true,
+      port: 9050,
       open: true, // opens browser window automatically
       /** Custom emoji `.tgs` с storage (см. `proxyStars.customEmojiDevProxyBase` в config.json). */
       proxy: {
+        '/api': {
+          target: 'https://rex85.vpn-telegram.com',
+          changeOrigin: true,
+          secure: true,
+        },
         '/bots_catalog': {
           target: 'https://storage.bot-market.com',
           changeOrigin: true,

@@ -1,24 +1,25 @@
+import type { ShopProduct } from 'src/api/vpn';
+
+export type ModalNames = 'order' | 'buy';
+
+export type { ShopProduct };
+
 export interface VpnModels {
-  tab: 'buy' | 'profile' | 'info' | 'orders';
+  tab: 'buy' | 'info' | 'orders';
   error: boolean;
   loading: boolean;
-  loadingOrders: boolean;
   modals: Record<ModalNames, boolean>;
   selectedPeriod: string;
 
-  prises: string;
+  products: Array<ShopProduct>;
+  shopSettingsLoaded: boolean;
 
   page: number;
-  limit: number;
   total: number;
 
   orders: Array<VpnKey>;
   selectedOrder: VpnKey | null;
-
-  instructions: { success: boolean; sections: Array<VpnInstruction>; support_text: string };
 }
-
-export type ModalNames = 'order' | 'buy';
 
 export const defaultKey: VpnKey = {
   key: '',
@@ -46,10 +47,3 @@ export const months = [
   'ноября',
   'декабря',
 ];
-
-export const periods = {
-  1: 30,
-  3: 90,
-  6: 180,
-  12: 365,
-};

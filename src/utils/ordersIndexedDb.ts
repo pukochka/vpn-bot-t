@@ -56,13 +56,3 @@ export const upsertOrder = async (order: VpnKey): Promise<void> => {
   if (!isIndexedDbAvailable()) return;
   await withStore<IDBValidKey>('readwrite', (store) => store.put(order));
 };
-
-export const removeOrderByKey = async (orderKey: string): Promise<void> => {
-  if (!isIndexedDbAvailable()) return;
-  await withStore<undefined>('readwrite', (store) => store.delete(orderKey));
-};
-
-export const clearOrders = async (): Promise<void> => {
-  if (!isIndexedDbAvailable()) return;
-  await withStore<undefined>('readwrite', (store) => store.clear());
-};

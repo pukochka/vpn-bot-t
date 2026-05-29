@@ -34,20 +34,18 @@ const vpn = useVpnStore();
 
 const loadLocalOrders = async () => {
   try {
-    vpn.loadingOrders = true;
     const orders = await getAllOrders();
 
     vpn.setOrders(orders);
   } catch {
-  } finally {
-    vpn.loadingOrders = false;
+    // Ignore IndexedDB read errors
   }
 };
 
 const updatePanel = async (nextTab?: string | number) => {
   const tab = nextTab || vpn.tab;
 
-  if (tab !== 'orders' && tab !== 'profile') return;
+  if (tab !== 'orders') return;
 
   await loadLocalOrders();
 };

@@ -1,4 +1,5 @@
 import type { ModalNames, VpnModels } from './vpnModels';
+import type { ShopSettingsData } from 'src/api/vpn';
 import { defaultKey } from './vpnModels';
 import { defineStore, acceptHMRUpdate } from 'pinia';
 
@@ -7,19 +8,17 @@ export const useVpnStore = defineStore('vpn', {
     tab: 'buy',
     error: false,
     loading: true,
-    loadingOrders: false,
-    instructions: { sections: [], success: false, support_text: '' },
 
     modals: { order: false, buy: false },
 
     selectedPeriod: '1',
-    prises: '1-150,3-400,6-600,12-1100',
+    products: [],
+    shopSettingsLoaded: false,
 
     orders: [],
     selectedOrder: defaultKey,
 
     page: 1,
-    limit: 5,
     total: 0,
   }),
 
@@ -37,6 +36,23 @@ export const useVpnStore = defineStore('vpn', {
     },
     closeModal(name: ModalNames) {
       this.modals[name] = false;
+    },
+    setShopSettings(settings: ShopSettingsData) {
+      const products = [...(settings.products || [])].sort(
+        (left, right) => left.product_id - right.product_id,
+      );
+
+      this.products = products;
+      this.shopSettingsLoaded = true;
+
+      if (products.length > 0) {
+        const hasSelected = products.some(
+          (product) => String(product.product_id) === this.selectedPeriod,
+        );
+        if (!hasSelected) {
+          this.selectedPeriod = String(products[0]?.product_id ?? '1');
+        }
+      }
     },
     setOrders(orders: Array<VpnKey>) {
       this.orders = orders;

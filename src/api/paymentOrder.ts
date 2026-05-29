@@ -1,20 +1,23 @@
 import axios, { type AxiosResponse } from 'axios';
 import { getApiV1Url } from 'src/utils/config';
 
-export interface PublicApiResponse<T> {
+interface PublicApiResponse<T> {
   result: boolean;
   data: T;
   message?: string;
 }
 
 export interface PaymentOrderStatusData {
+  order_id?: string;
+  history_id?: number | string;
   status: string;
-  amount?: number;
+  amount?: number | string;
   redirect_action?: string | null;
   redirect_data?: Record<string, unknown> | null;
   status_text?: string;
   payment_status?: string;
   config_url?: string;
+  key?: string | null;
   finish_at?: string | number;
   activated_at?: string | number;
   traffic_limit?: string | number;
@@ -25,6 +28,8 @@ export interface PaymentGroup {
   id: number;
   title?: string;
   name?: string;
+  text_choose?: string;
+  sort?: number;
 }
 
 export interface PaymentGroupsData extends PaymentOrderStatusData {
@@ -39,6 +44,7 @@ export interface PaymentItemDesign {
 
 export interface PaymentItem {
   id: number;
+  group_id?: number;
   title?: string;
   design?: PaymentItemDesign;
   data?: Record<string, unknown>;
@@ -71,12 +77,37 @@ export interface PaymentPayData extends PaymentOrderStatusData {
 }
 
 export interface StoredPaymentOrderContext {
-  bot_id: number;
   order_id: string;
+  email?: string;
   created_at: number;
   updated_at: number;
   create_order_response?: Record<string, unknown> | undefined;
 }
+
+const ORDER_ID_PREFIXES = ['mp', 'o'] as const;
+
+export const normalizeOrderId = (value: unknown): string => {
+  if (typeof value === 'number' && Number.isInteger(value) && value > 0) {
+    return `mp-${value}`;
+  }
+
+  if (typeof value !== 'string') return '';
+  const trimmed = value.trim();
+  if (!trimmed) return '';
+
+  for (const prefix of ORDER_ID_PREFIXES) {
+    const pattern = new RegExp(`^${prefix}-\\d+$`, 'i');
+    if (pattern.test(trimmed)) {
+      return `${prefix}-${trimmed.replace(new RegExp(`^${prefix}-`, 'i'), '')}`;
+    }
+  }
+
+  if (/^\d+$/.test(trimmed)) {
+    return `mp-${trimmed}`;
+  }
+
+  return '';
+};
 
 const buildUrl = (action: string): string => `${getApiV1Url()}/payment/order/${action}`;
 const PAYMENT_CONTEXT_DB_NAME = 'vpn-payment-order-context-db';
@@ -97,20 +128,6 @@ const postPublic = async <T>(
   );
 
   return response.data;
-};
-
-const normalizeOrderId = (value: unknown): string => {
-  if (typeof value === 'number' && Number.isInteger(value) && value > 0) {
-    return `o-${value}`;
-  }
-
-  if (typeof value !== 'string') return '';
-  const trimmed = value.trim();
-  if (!trimmed) return '';
-  if (/^o-\d+$/i.test(trimmed)) return `o-${trimmed.replace(/^o-/i, '')}`;
-  if (/^\d+$/.test(trimmed)) return `o-${trimmed}`;
-
-  return '';
 };
 
 const isIndexedDbAvailable = (): boolean =>
@@ -166,13 +183,12 @@ export const getStoredPaymentOrderContext = async (): Promise<StoredPaymentOrder
     const parsed = rawRecord?.value as Partial<StoredPaymentOrderContext> | null | undefined;
 
     if (!parsed || typeof parsed !== 'object') return null;
-    if (!Number.isInteger(parsed.bot_id) || Number(parsed.bot_id) <= 0) return null;
     const normalizedOrderId = normalizeOrderId(parsed.order_id);
     if (!normalizedOrderId) return null;
 
     return {
-      bot_id: Number(parsed.bot_id),
       order_id: normalizedOrderId,
+      email: typeof parsed.email === 'string' ? parsed.email : undefined,
       created_at:
         typeof parsed.created_at === 'number' && Number.isFinite(parsed.created_at)
           ? parsed.created_at
@@ -192,20 +208,19 @@ export const getStoredPaymentOrderContext = async (): Promise<StoredPaymentOrder
 };
 
 export const savePaymentOrderContext = async (payload: {
-  bot_id: number;
   order_id: string;
+  email?: string;
   create_order_response?: Record<string, unknown>;
 }): Promise<void> => {
   if (!isIndexedDbAvailable()) return;
-  if (!Number.isInteger(payload.bot_id) || payload.bot_id <= 0) return;
   const normalizedOrderId = normalizeOrderId(payload.order_id);
   if (!normalizedOrderId) return;
 
   const current = await getStoredPaymentOrderContext();
   const now = Date.now();
   const nextValue: StoredPaymentOrderContext = {
-    bot_id: payload.bot_id,
     order_id: normalizedOrderId,
+    email: payload.email ?? current?.email,
     created_at: current?.created_at ?? now,
     updated_at: now,
     create_order_response: payload.create_order_response ?? current?.create_order_response,
@@ -233,24 +248,19 @@ export const clearStoredPaymentOrderContext = async (): Promise<void> => {
 };
 
 export class PaymentOrderService {
-  static async getStatus(payload: { bot_id: number; order_id: string }) {
-    return postPublic<PaymentOrderStatusData>('get-status', payload);
-  }
-
-  static async getGroups(payload: { bot_id: number; order_id: string }) {
+  static async getGroups(payload: { order_id: string }) {
     return postPublic<PaymentGroupsData>('get-groups', payload);
   }
 
-  static async getItems(payload: { bot_id: number; order_id: string; group_id: number }) {
+  static async getItems(payload: { order_id: string; group_id: number }) {
     return postPublic<PaymentItemsData>('get-items', payload);
   }
 
-  static async getPayData(payload: { bot_id: number; order_id: string; item_id: number }) {
+  static async getPayData(payload: { order_id: string; item_id: number }) {
     return postPublic<PaymentPayData>('get-pay-data', payload);
   }
 
   static async setPayInput(payload: {
-    bot_id: number;
     order_id: string;
     item_id: number;
     input_value: string;
@@ -258,11 +268,11 @@ export class PaymentOrderService {
     return postPublic<PaymentPayData>('set-pay-input', payload);
   }
 
-  static async checkPay(payload: { bot_id: number; order_id: string }) {
+  static async checkPay(payload: { order_id: string }) {
     return postPublic<PaymentOrderStatusData>('check-pay', payload);
   }
 
-  static async cancel(payload: { bot_id: number; order_id: string }) {
+  static async cancel(payload: { order_id: string }) {
     return postPublic<PaymentOrderStatusData>('cancel', payload);
   }
 }
